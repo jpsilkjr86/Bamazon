@@ -1,7 +1,9 @@
 var mysql = require('mysql');
-var keys = require('./keys.js');
+var keys = require('./assets/keys/keys.js');
 var inquirer = require('inquirer');
 var prompt = inquirer.createPromptModule();
+
+var customerMenu = require('./assets/menus/customer-menu.js');
 
 var connection = mysql.createConnection({
 	host: 'localhost',
@@ -67,6 +69,13 @@ connection.connect(function(err) {
 		}
 		]).then(function(answers){
 			console.log(answers);
+
+			customerMenu.main();
+			// find the desired item. if it doesn't exist, return.
+
+
+
+
 			connection.end();
 		});
 
