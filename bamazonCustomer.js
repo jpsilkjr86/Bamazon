@@ -31,18 +31,53 @@ connection.connect(function(err) {
 				+ ' | ' + results[i].product_name
 				+ ' | $' + results[i].price);
 		}
-		connection.end();
+
+		console.log('\nWelcome to Bamazon! What would you like to purchase today?\n');
+		// Prompt 1: ask user to enter the item_id of the product they would like to purchase
+		prompt([
+		{
+			type: 'input',
+			message: 'Item ID:',
+			name: 'requested_id',
+			validate: function(str) {
+				if (isNaN(str)) {
+					console.log('\n\nPlease enter a valid number.\n');
+					return false;
+				}
+				return true;
+			},
+			filter: function(str) {
+				return parseInt(str.trim());
+			}
+		},{ 
+		// Prompt 2: ask how many items they'd like to purchase
+			type: 'input',
+			message: 'Quantity:',
+			name: 'requested_quantity',
+			validate: function(str) {
+				if (isNaN(str)) {
+					console.log('\nPlease enter a valid number.\n');
+					return false;
+				}
+				return true;
+			},
+			filter: function(str) {
+				return parseInt(str.trim());
+			}
+		}
+		]).then(function(answers){
+			console.log(answers);
+			connection.end();
+		});
+
+			// Query database
+
+				// if requested_quantity > stock_quantity, display "Insufficient Stock" message
+
+				// else calculate and display price to user, update db by subtracting from stock_quantity
+
 	});	
 
-	// Prompt 1: ask user to enter the item_id of the product they would like to purchase
-
-	// Prompt 2: ask how many items they'd like to purchase
-
-		// Query database
-
-			// if requested_quantity > stock_quantity, display "Insufficient Stock" message
-
-			// else calculate and display price to user, update db by subtracting from stock_quantity
 
 
 
