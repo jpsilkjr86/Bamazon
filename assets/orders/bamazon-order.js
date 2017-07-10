@@ -37,13 +37,12 @@ BamazonOrder.prototype.checkout = function () {
 			// if connection error
 			if (err) {
 				thisOrder.order_success = false;
-				thisOrder.order_status = err;
-				reject(err);
+				thisOrder.order_status = 'Server connection error';
+				reject(thisOrder.order_status);
 				return connection.end();
 			}
 			// if item_id yields no results
 			if (results.length === 0) {
-				console.log('no exist');
 				thisOrder.order_success = false;
 				thisOrder.order_status = "Item doesn't exist in database.";
 				reject(thisOrder.order_status);
@@ -52,7 +51,6 @@ BamazonOrder.prototype.checkout = function () {
 			// if out of stock
 			if (results[0].stock_quantity == null 
 				|| results[0].stock_quantity === 0) {
-					console.log('zero stock');
 					thisOrder.order_success = false;
 					thisOrder.order_status = 'Out of stock.';
 					reject(thisOrder.order_status);
@@ -67,22 +65,47 @@ BamazonOrder.prototype.checkout = function () {
 				return connection.end();
 			}
 
-			// these values are updated after mysql query. default values set in paramters above.
-			thisOrder.product_name = results[0].product_name;
-			thisOrder.price = results[0].price;
-			thisOrder.department_name = results[0].department_name;
-			thisOrder.order_success = true;
-			thisOrder.order_status = 'Purchase successful!';
+			// updates database by subtracting stock_quantity by requested_quantity
+			connection.query('UPDATE products SET ??=? WHERE item_id=?',
+				['stock_quantity',
+					results[0].stock_quantity - thisOrder.requested_quantity,
+					thisOrder.item_id],
+				function(err2, result){
+					if (err2) {
+						thisOrder.order_success = false;
+						thisOrder.order_status = 'Server connection error';
+						reject(thisOrder.order_status);
+						return connection.end();
+					}
 
-			// calculated by multiplying price and requested_quantity
-			thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+					console.log('changed ' + result.changedRows + ' rows');
 
-			// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
-			resolve(thisOrder);
+					// these values are updated after mysql query. default values set in paramters above.
+					thisOrder.product_name = results[0].product_name;
+					thisOrder.price = results[0].price;
+					thisOrder.department_name = results[0].department_name;
+					thisOrder.order_success = true;
+					thisOrder.order_status = 'Purchase successful!';
 
-			return connection.end();
+					// calculated by multiplying price and requested_quantity
+					thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+
+					// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
+					resolve(thisOrder);
+
+					return connection.end();
+				} // end of callback
+			); // end of update query					
+		}); // end of select query
+	}); // end of Promise
+}; // end of checkout()
+
+BamazonOrder.prototype.updateDatabase = function () {
+	connection.query('UPDATE products SET ??=? WHERE item_id=?',
+		[''],
+		function(error, results){
+
 		});
-	});
-};
+}; // end of updateDatabase
 
 module.exports = BamazonOrder;

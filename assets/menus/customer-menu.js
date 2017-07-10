@@ -159,7 +159,7 @@ var customerMenu = {
 					}
 				}
 				]).then(function(answers){
-					
+
 					// starts a newOrder object
 					const newOrder = 
 						new BamazonOrder(answers.requested_id, answers.requested_quantity);
@@ -178,10 +178,10 @@ var customerMenu = {
 
 						return customerMenu.main();
 
-					}).catch(function(err){
+					}).catch(function(failureMessage){
 						// if the checkout was unsuccessful, display reason, return to main menu
-						console.log('catch');
-						console.log(err);
+						console.log('\nSorry, but we were unable to process your purchase.\n'
+							+ '\nReason for failure: ' + failureMessage + '\n');
 
 						return customerMenu.main();
 					});  // end of newOrder.checkout() 
