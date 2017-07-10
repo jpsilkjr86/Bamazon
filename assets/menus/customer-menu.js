@@ -150,54 +150,28 @@ var customerMenu = {
 						return parseInt(str.trim());
 					}
 				}
-				]).then(function(a){
-					console.log(a);
+				]).then(function(answers){
+					console.log(answers);
 
-					// creates a new order. callback defined since some data cannot be 
-					// retriveed synchronously.
-					// 'hash' callback parameter is the updated datatable of the order.
-					// latestProductData is the most up-to-date data on the requested product 
-					// retrieved from the database.
-					const newOrder = new BamazonOrder(a.requested_id, a.requested_quantity)
-					.then(function(instance, latestProductData){
-						console.log(instance, latestProductData);
-						// if the requested order doesn't exist on the database
-						if (!instance.existsInDatabase) {
-							console.log("\nWe're sorry, but the item you requested does not currently "
-								+ "exist in Bamazon's database. Returning to the main menu...\n");
-							return customerMenu.main();
-						}
+					// starts a newOrder object
+					const newOrder = 
+						new BamazonOrder(answers.requested_id, answers.requested_quantity);
 
-						// if the current stock of the requested product is null or zero
-						if (latestProductData.stock_quantity == null 
-							|| latestProductData.stock_quantity === 0) {
-							console.log("\nWe're sorry, but the item you requested is currently out "
-								+ "of stock. Returning to the main menu...\n");
-							return customerMenu.main();
-						}
+					// checkout function is a prototyped Promise. instance is final order status
+					newOrder.checkout().then(function(instance){
+						// if the checkout is successful, then do this
+						console.log('then');
+						console.log(instance);
+						
+						return customerMenu.main();
 
-						// if the requested quantity is greater than the number of items in stock
-						if (instance.requested_quantity > latestProductData.stock_quantity) {
-							console.log("\nWe're sorry, but we currently only have " 
-								+ latestProductData.stock_quantity + " items left in stock.\n"
-								+ "Returning to the main menu...");
-							return customerMenu.main();
-						}
+					}).catch(function(err){
+						// if the checkout was unsuccessful, display reason, return to main menu
+						console.log('catch');
+						console.log(err);
+
+						return customerMenu.main();
 					});
-	
-
-
-					// newOrder.checkout();
-					// // if product doesn't exist among allProducts, returns to main main
-					// if (!newOrder.isIdValid(allProducts)) {
-					// 	console.log("\nWe're sorry, but the item id you requested does not currently "
-					// 		+ "exist in Bamazon's database. Returning to main menu...\n");
-					// 	return customerMenu.main();
-					// }
-
-					// newOrder.up
-
-					// connection.end();
 				});
 
 					// Query database
