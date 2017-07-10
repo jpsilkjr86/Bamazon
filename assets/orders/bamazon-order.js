@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
 });
 
 
-var BamazonOrder = function (item_id=0, requested_quantity=0, callback, 
+var BamazonOrder = function (item_id=0, requested_quantity=0, // callback, 
 	existsInDatabase=false, product_name='', price=0, department_name='', total_cost=0) {
 	
 	// these are the first items that will be received
@@ -25,13 +25,17 @@ var BamazonOrder = function (item_id=0, requested_quantity=0, callback,
 	// queries database for most recent product data
 	connection.query('SELECT * FROM products WHERE item_id=?', [item_id], function(err, results) {
 		if (err) {
-			console.log(err);
-			return connection.end();
+			// console.log(err);
+			return new Promise(function(resolve){
+				resolve(thisOrder, err);
+			});
 		}
 
 		if (results.length === 0) {
 			thisOrder.existsInDatabase = false;
-			return callback(thisOrder, results[0]);
+			return new Promise(function(resolve){
+				resolve(thisOrder, results);
+			});			
 		}
 
 		thisOrder.existsInDatabase = true;
@@ -51,7 +55,9 @@ var BamazonOrder = function (item_id=0, requested_quantity=0, callback,
 
 		// callback parameters include the updated hash of thisOrder
 		// and the query results (i.e. the most updated product data)
-		callback(thisOrder, results[0]);
+		return new Promise(function(resolve){
+			resolve(thisOrder, results[0]);
+		});
 
 	});
 

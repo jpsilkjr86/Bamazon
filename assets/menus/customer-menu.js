@@ -158,10 +158,11 @@ var customerMenu = {
 					// 'hash' callback parameter is the updated datatable of the order.
 					// latestProductData is the most up-to-date data on the requested product 
 					// retrieved from the database.
-					const newOrder = new BamazonOrder(a.requested_id, a.requested_quantity,
-						function(hash, latestProductData) {
+					const newOrder = new BamazonOrder(a.requested_id, a.requested_quantity)
+					.then(function(instance, latestProductData){
+						console.log(instance, latestProductData);
 						// if the requested order doesn't exist on the database
-						if (!hash.existsInDatabase) {
+						if (!instance.existsInDatabase) {
 							console.log("\nWe're sorry, but the item you requested does not currently "
 								+ "exist in Bamazon's database. Returning to the main menu...\n");
 							return customerMenu.main();
@@ -176,14 +177,14 @@ var customerMenu = {
 						}
 
 						// if the requested quantity is greater than the number of items in stock
-						if (hash.requested_quantity > latestProductData.stock_quantity) {
+						if (instance.requested_quantity > latestProductData.stock_quantity) {
 							console.log("\nWe're sorry, but we currently only have " 
 								+ latestProductData.stock_quantity + " items left in stock.\n"
 								+ "Returning to the main menu...");
 							return customerMenu.main();
 						}
-
 					});
+	
 
 
 					// newOrder.checkout();
