@@ -30,7 +30,7 @@ var customerMenu = {
 			// proceeds to customerMenu.main() if connection is successful
 			console.log('connected as id ' + connection.threadId
 				+ '\n\n*************** Welcome to Bamazon! ***************\n');
-			customerMenu.main();
+			return customerMenu.main();
 		});
 	}, // end of customerMenu.intitialize()
 
@@ -50,12 +50,12 @@ var customerMenu = {
 
 			if (answers.mainMenuChoice === 'I would like to purchase an item.') {
 				// proceeds to purchase menu
-				customerMenu.purchase.main();
+				return customerMenu.purchase.main();
 			}
 
 			if (answers.mainMenuChoice === 'Quit') {
 				// proceeds to quit
-				customerMenu.quit();
+				return customerMenu.quit();
 			}				
 		});
 	}, // end of customerMenu.main()
@@ -73,43 +73,49 @@ var customerMenu = {
 				type: 'list',
 				message: 'You can...',
 				choices: ['List all items and make a purchase.', 
-					'Browse items by department.'
+					'Browse items by department.',
 					'Return to the main menu.'],
 				name: 'purchaseMenuChoice'
 			}
 			]).then(function(answers){
 				// proceed to the next step according to the user's choice
 				if (answers.purchaseMenuChoice === 'List all items and make a purchase.') {
-					customerMenu.purchase.listAllAndBuy();
+					return customerMenu.purchase.listAllAndBuy();
 				}
 
 				if (answers.purchaseMenuChoice === 'Browse items by department.') {
-					customerMenu.purchase.browseByDept();
+					return customerMenu.purchase.browseByDept();
 				}
 
 				if (answers.purchaseMenuChoice === 'Return to the main menu.') {
-					customerMenu.main();
+					return customerMenu.main();
 				}
 			});
 		}, // end of customerMenu.purchase.main()
 
 		// prompt for listing all items on Bamazon and purchasing by id
 		listAllAndBuy: function() {
-			console.log('\n======= ALL ITEMS =======\n');
-			// Display all available products (item_id, product_name, price)
-			connection.query('SELECT ?? FROM products', [['item_id', 'product_name', 'price']], function(error, results){
-				if (error) {
+			console.log('\n======= BROWSE ALL ITEMS =======\n');
+			// Displays all available products (item_id, product_name, price)
+			connection.query('SELECT ?? FROM products', [['item_id', 'product_name', 'price']], function(err, results) {
+
+				if (err) {
 					connection.end();
-					return console.log(error);
+					return console.log(err);
 				}
 
-				for (let i = 0; i < results.length; i++) {
-					console.log('Item Id: ' + results[i].item_id 
-						+ ' | ' + results[i].product_name
-						+ ' | $' + results[i].price);
+				// saves results as more descriptive variable
+				let allProducts = results;
+
+				// loops through allProducts and displays info
+				for (let i = 0; i < allProducts.length; i++) {
+					console.log('Item Id: ' + allProducts[i].item_id 
+						+ ' | ' + allProducts[i].product_name
+						+ ' | $' + allProducts[i].price);
 				}
 
 				console.log('\nWhat would you like to purchase today?\n');
+
 				// Prompt 1: ask user to enter the item_id of the product they would like to purchase
 				prompt([
 				{
@@ -145,8 +151,8 @@ var customerMenu = {
 				]).then(function(answers){
 					console.log(answers);
 
-					customerMenu.main();
 					// find the desired item. if it doesn't exist, return.
+					
 
 
 
@@ -167,9 +173,9 @@ var customerMenu = {
 		// menu for browsing by department
 		browseByDept: function() {
 			console.log('\n======= BROWSE BY DEPARTMENT =======\n' 
-				+ '"Browse by Department" feature still under construction.'
+				+ '\n"Browse by Department" feature still under construction.'
 				+ '\nReturning to the main menu...\n');
-			customerMenu.main();
+			return customerMenu.main();
 		}
 	}, // end of customerMenu.purchase subset object
 
