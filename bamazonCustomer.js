@@ -21,5 +21,13 @@ connection.connect(function(err) {
 
 	console.log('connected as id ' + connection.threadId);
 
-	connection.end();
+	connection.query('SELECT * FROM products WHERE department_name="Toys"', function(error, results){
+		if (err) {
+			console.log(err);
+			return;
+		}
+
+		console.log(results);
+		connection.end();
+	});
 });
