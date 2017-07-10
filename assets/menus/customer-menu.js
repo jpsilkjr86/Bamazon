@@ -15,6 +15,8 @@ var connection = mysql.createConnection({
 	database: 'bamazon'
 });
 
+var BamazonOrder = require('../orders/bamazon-order.js');
+
 // customerMenu object, to be exported as a module
 var customerMenu = {
 	// initialization method for customerMenu -- 
@@ -151,13 +153,20 @@ var customerMenu = {
 				]).then(function(answers){
 					console.log(answers);
 
-					// find the desired item. if it doesn't exist, return.
-					
+					const newOrder = new BamazonOrder(answers.requested_id, answers.requested_quantity);
 
 
+					newOrder.checkout();
+					// // if product doesn't exist among allProducts, returns to main main
+					// if (!newOrder.isIdValid(allProducts)) {
+					// 	console.log("\nWe're sorry, but the item id you requested does not currently "
+					// 		+ "exist in Bamazon's database. Returning to main menu...\n");
+					// 	return customerMenu.main();
+					// }
 
+					// newOrder.up
 
-					connection.end();
+					// connection.end();
 				});
 
 					// Query database
