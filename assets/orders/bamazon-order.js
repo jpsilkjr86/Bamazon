@@ -17,7 +17,13 @@ var BamazonOrder = function (item_id=0, requested_quantity=0, product_name='', p
 	
 	// these are the first items that will be received
 	this.item_id = item_id;
-	this.requested_quantity = requested_quantity;		
+	this.requested_quantity = requested_quantity;
+	this.product_name = product_name;
+	this.price = price;
+	this.department_name = department_name;
+	this.total_cost = total_cost;
+	this.order_success = order_success;
+	this.order_status = order_status;
 };
 
 
@@ -33,7 +39,7 @@ BamazonOrder.prototype.checkout = function () {
 				thisOrder.order_success = false;
 				thisOrder.order_status = err;
 				reject(err);
-				return;
+				return connection.end();
 			}
 			// if item_id yields no results
 			if (results.length === 0) {
@@ -41,7 +47,7 @@ BamazonOrder.prototype.checkout = function () {
 				thisOrder.order_success = false;
 				thisOrder.order_status = "Item doesn't exist in database.";
 				reject(thisOrder.order_status);
-				return;
+				return connection.end();
 			}
 			// if out of stock
 			if (results[0].stock_quantity == null 
@@ -50,7 +56,7 @@ BamazonOrder.prototype.checkout = function () {
 					thisOrder.order_success = false;
 					thisOrder.order_status = 'Out of stock.';
 					reject(thisOrder.order_status);
-					return;
+					return connection.end();
 			}
 			// if requested quantity is greater than what's in stock
 			if (thisOrder.requested_quantity > results[0].stock_quantity) {
@@ -58,20 +64,23 @@ BamazonOrder.prototype.checkout = function () {
 				thisOrder.order_success = false;
 				thisOrder.order_status = 'Insufficient stock.';
 				reject(thisOrder.order_status);
-				return;
+				return connection.end();
 			}
 
 			// these values are updated after mysql query. default values set in paramters above.
 			thisOrder.product_name = results[0].product_name;
 			thisOrder.price = results[0].price;
+			thisOrder.department_name = results[0].department_name;
+			thisOrder.order_success = true;
+			thisOrder.order_status = 'Purchase successful!';
 
 			// calculated by multiplying price and requested_quantity
 			thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
 
-			console.log('before resolve', results[0]);
-			// resolve parameters include the updated hash of thisOrder
-			// and the query results (i.e. the most updated product data)
+			// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
 			resolve(thisOrder);
+
+			return connection.end();
 		});
 	});
 };

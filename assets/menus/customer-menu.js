@@ -129,6 +129,10 @@ var customerMenu = {
 							console.log('\n\nPlease enter a valid number.\n');
 							return false;
 						}
+						if (parseInt(str) < 1) {
+							console.log('\n\nInputs must be greater than zero.\n');
+							return false;
+						}
 						return true;
 					},
 					filter: function(str) {
@@ -144,6 +148,10 @@ var customerMenu = {
 							console.log('\nPlease enter a valid number.\n');
 							return false;
 						}
+						if (parseInt(str) < 1) {
+							console.log('\n\nInputs must be greater than zero.\n');
+							return false;
+						}
 						return true;
 					},
 					filter: function(str) {
@@ -151,18 +159,23 @@ var customerMenu = {
 					}
 				}
 				]).then(function(answers){
-					console.log(answers);
-
+					
 					// starts a newOrder object
 					const newOrder = 
 						new BamazonOrder(answers.requested_id, answers.requested_quantity);
 
-					// checkout function is a prototyped Promise. instance is final order status
-					newOrder.checkout().then(function(instance){
+					// checkout function is a prototyped Promise.
+					newOrder.checkout().then(function(orderDetails){
 						// if the checkout is successful, then do this
-						console.log('then');
-						console.log(instance);
-						
+						console.log('\nYour purchase was successful!\n'
+							+ '\n ======= ORDER DETAILS: ======= \n'
+							+ '\nItem ID: ' + orderDetails.item_id
+							+ '\nProduct: ' + orderDetails.product_name
+							+ '\nDepartment: ' + orderDetails.department_name
+							+ '\nUnit Price: ' + orderDetails.price
+							+ '\nQuantity: ' + orderDetails.requested_quantity
+							+ '\nPurchase Total: ' + orderDetails.total_cost);
+
 						return customerMenu.main();
 
 					}).catch(function(err){
@@ -171,17 +184,9 @@ var customerMenu = {
 						console.log(err);
 
 						return customerMenu.main();
-					});
-				});
-
-					// Query database
-
-						// if requested_quantity > stock_quantity, display "Insufficient Stock" message
-
-						// else calculate and display price to user, update db by subtracting from stock_quantity
-
-			});	
-
+					});  // end of newOrder.checkout() 
+				}); // end of prompt()
+			});	// end of connection.query()
 		}, // end of customerMenu.purchase.listAllAndBuy()
 
 		// menu for browsing by department
