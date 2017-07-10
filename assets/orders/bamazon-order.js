@@ -11,18 +11,100 @@ var connection = mysql.createConnection({
 	database: 'bamazon'
 });
 
-// constructor to be exported
-var BamazonOrder = function (item_id=0, requested_quantity=0, existsInDatabase=false, product_name='', price=0) {
-	// this are the first items that will be received
+
+var BamazonOrder = function (item_id=0, requested_quantity=0, callback, 
+	existsInDatabase=false, product_name='', price=0, department_name='', total_cost=0) {
+	
+	// these are the first items that will be received
 	this.item_id = item_id;
 	this.requested_quantity = requested_quantity;
-	// these values are updated after mysql query. default values set in paramters above.
-	this.existsInDatabase = existsInDatabase;
-	this.product_name = product_name;
-	this.price = price;
-	// calculated by multiplying price and requested_quantity
-	this.total_cost = this.price * this.requested_quantity;
+
+	// saves 'this' object as more manageable variable
+	const thisOrder = this;
+
+	// queries database for most recent product data
+	connection.query('SELECT * FROM products WHERE item_id=?', [item_id], function(err, results) {
+		if (err) {
+			console.log(err);
+			return connection.end();
+		}
+
+		if (results.length === 0) {
+			thisOrder.existsInDatabase = false;
+			return callback(thisOrder, results[0]);
+		}
+
+		thisOrder.existsInDatabase = true;
+
+		// these values are updated after mysql query. default values set in paramters above.
+		thisOrder.product_name = results[0].product_name;
+		thisOrder.price = results[0].price;
+
+		// calculated by multiplying price and requested_quantity
+		thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+
+		// if requested_quantity > results[i].stock_quantity
+		// 
+
+		console.log(results);
+		console.log(thisOrder);
+
+		// callback parameters include the updated hash of thisOrder
+		// and the query results (i.e. the most updated product data)
+		callback(thisOrder, results[0]);
+
+	});
+
+		
 };
+
+
+// constructor to be exported
+// var BamazonOrder = function (item_id=0, requested_quantity=0, callback, 
+// 	existsInDatabase=false, product_name='', price=0, department_name='', total_cost=0) {
+	
+// 	// these are the first items that will be received
+// 	this.item_id = item_id;
+// 	this.requested_quantity = requested_quantity;
+
+// 	// saves 'this' object as more manageable variable
+// 	const thisOrder = this;
+
+// 	// queries database for most recent product data
+// 	connection.query('SELECT * FROM products WHERE item_id=?', [item_id], function(err, results) {
+// 		if (err) {
+// 			console.log(err);
+// 			return connection.end();
+// 		}
+
+// 		if (results.length === 0) {
+// 			thisOrder.existsInDatabase = false;
+// 			return callback(thisOrder, results[0]);
+// 		}
+
+// 		thisOrder.existsInDatabase = true;
+
+// 		// these values are updated after mysql query. default values set in paramters above.
+// 		thisOrder.product_name = results[0].product_name;
+// 		thisOrder.price = results[0].price;
+
+// 		// calculated by multiplying price and requested_quantity
+// 		thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+
+// 		// if requested_quantity > results[i].stock_quantity
+// 		// 
+
+// 		console.log(results);
+// 		console.log(thisOrder);
+
+// 		// callback parameters include the updated hash of thisOrder
+// 		// and the query results (i.e. the most updated product data)
+// 		callback(thisOrder, results[0]);
+
+// 	});
+
+		
+// };
 
 // function that loops through productsArray argument
 // and sees if the id exists
