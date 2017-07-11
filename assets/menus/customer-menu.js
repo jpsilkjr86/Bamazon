@@ -1,13 +1,18 @@
 // imports inquirer npm, creates prompt
-var inquirer = require('inquirer');
-var prompt = inquirer.createPromptModule();
+const inquirer = require('inquirer');
+const prompt = inquirer.createPromptModule();
 
-var bamazonDB = require('../db-mng/bamazon-db-mng.js');
+// imports Table constructor from cli-table npm
+const Table = require('cli-table');
 
-var BamazonOrder = require('../orders/bamazon-order.js');
+// imports custom modules. bamazonDB for back-end database mng,
+// BamazonOrder for constructor of new orders
+const bamazonDB = require('../db-mng/bamazon-db-mng.js');
+
+const BamazonOrder = require('../orders/bamazon-order.js');
 
 // customerMenu object, to be exported as a module
-var customerMenu = {
+const customerMenu = {
 	// initialization method for customerMenu -- 
 	// checks if Bamazon server connection can be established before proceeding.
 	initialize: function() {
