@@ -65,47 +65,58 @@ BamazonOrder.prototype.checkout = function () {
 				return connection.end();
 			}
 
-			// updates database by subtracting stock_quantity by requested_quantity
-			connection.query('UPDATE products SET ??=? WHERE item_id=?',
-				['stock_quantity',
-					results[0].stock_quantity - thisOrder.requested_quantity,
-					thisOrder.item_id],
-				function(err2, result){
-					if (err2) {
-						thisOrder.order_success = false;
-						thisOrder.order_status = 'Server connection error';
-						reject(thisOrder.order_status);
-						return connection.end();
-					}
+			thisOrder.updateDatabase().then(function(){
+				// these values are updated after mysql query. default values set in paramters above.
+				thisOrder.product_name = results[0].product_name;
+				thisOrder.price = results[0].price;
+				thisOrder.department_name = results[0].department_name;
+				thisOrder.order_success = true;
+				thisOrder.order_status = 'Purchase successful!';
 
-					console.log('changed ' + result.changedRows + ' rows');
+				// calculated by multiplying price and requested_quantity
+				thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
 
-					// these values are updated after mysql query. default values set in paramters above.
-					thisOrder.product_name = results[0].product_name;
-					thisOrder.price = results[0].price;
-					thisOrder.department_name = results[0].department_name;
-					thisOrder.order_success = true;
-					thisOrder.order_status = 'Purchase successful!';
+				// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
+				resolve(thisOrder);
 
-					// calculated by multiplying price and requested_quantity
-					thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
-
-					// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
-					resolve(thisOrder);
-
-					return connection.end();
-				} // end of callback
-			); // end of update query					
+			// catch defaults to server connection error
+			}).catch(function(){
+				thisOrder.order_success = false;
+				thisOrder.order_status = 'Server connection error';
+				reject(thisOrder.order_status);
+				return connection.end();
+			});						
 		}); // end of select query
 	}); // end of Promise
 }; // end of checkout()
 
-BamazonOrder.prototype.updateDatabase = function () {
-	connection.query('UPDATE products SET ??=? WHERE item_id=?',
-		[''],
-		function(error, results){
+BamazonOrder.prototype.updateDatabase = function () {	
+	// saves 'this' object as more manageable variable
+	const thisOrder = this;
 
-		});
+	return new Promise(function(resolve, reject) {
+		
+		// creates a query string that sets the stock_quantity equal to the
+		// current stock_quantity minus this order's requested_quantity
+		// of the given item_id.
+		let queryString = 'UPDATE products SET stock_quantity=stock_quantity-'
+			+ thisOrder.requested_quantity + ' WHERE item_id=' + thisOrder.item_id;
+
+		// updates database by subtracting current stock_quantity by requested_quantity
+		connection.query(queryString, function(err, result){
+				if (err) {
+					reject();
+					throw err;
+				}
+
+				console.log('changed ' + result.changedRows + ' rows');
+
+				resolve();
+
+				return connection.end();
+			} // end of callback
+		); // end of update query
+	}); // end of Promise
 }; // end of updateDatabase
 
 module.exports = BamazonOrder;
