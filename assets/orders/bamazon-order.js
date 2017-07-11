@@ -11,6 +11,8 @@ var connection = mysql.createConnection({
 	database: 'bamazon'
 });
 
+var bamazonDB = require('../db-mng/bamazon-db-mng.js');
+
 
 var BamazonOrder = function (item_id=0, requested_quantity=0, product_name='', price=0, 
 	department_name='', total_cost=0, order_success=false, order_status=null) {
@@ -30,8 +32,46 @@ var BamazonOrder = function (item_id=0, requested_quantity=0, product_name='', p
 BamazonOrder.prototype.checkout = function () {
 	// saves 'this' object as more manageable variable
 	const thisOrder = this;
-
+	// checkout returns a promise. two conditions must be met which require asynchronous handling: 
+	//    1) product is able to be found in the database, after which
+	//    2) the database is able to successfully update the database without error or 
+	//        resulting in negative stock_quantity
 	return new Promise(function(resolve, reject) {
+		// checkout continues if it's able to retrieve product info from database if it's in stock
+		bamazonDB.getProductById(thisOrder.item_id).then(function(product) {
+			
+			// if product.stock_quantity < thisOrder.requested_quantity, do not proceed
+			if (product.stock_quantity < thisOrder.requested_quantity) {
+				return reject('Insufficient stock.');
+			}
+
+			// updates database after successfully retrieving product and if product is available
+			thisOrder.updateDatabase().then(function(){
+				// these values are updated after mysql query. default values set in paramters above.
+				thisOrder.product_name = product.product_name;
+				thisOrder.price = product.price;
+				thisOrder.department_name = product.department_name;
+				thisOrder.order_success = true;
+				thisOrder.order_status = 'Purchase successful!';
+
+				// calculated by multiplying price and requested_quantity
+				thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+
+				// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
+				return resolve(thisOrder);
+
+			// catch defaults to server connection error
+			}).catch(function(errMsg){
+				return reject(errMsg);
+			});	
+
+		}).catch(function(failureMessage){
+			// passes failureMessage parameter from one promise to the next
+			return reject(failureMessage);
+		});
+
+
+		/*
 		// queries database for most recent product data
 		connection.query('SELECT * FROM products WHERE item_id=?', [thisOrder.item_id], function(err, results) {
 			// if connection error
@@ -71,6 +111,7 @@ BamazonOrder.prototype.checkout = function () {
 				return reject(errMsg);
 			});						
 		}); // end of select query
+		*/
 	}); // end of Promise
 }; // end of checkout()
 
