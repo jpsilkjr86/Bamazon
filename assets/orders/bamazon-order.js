@@ -36,33 +36,20 @@ BamazonOrder.prototype.checkout = function () {
 		connection.query('SELECT * FROM products WHERE item_id=?', [thisOrder.item_id], function(err, results) {
 			// if connection error
 			if (err) {
-				thisOrder.order_success = false;
-				thisOrder.order_status = 'Server connection error';
-				reject(thisOrder.order_status);
-				return connection.end();
+				return reject('Server connection error');
 			}
 			// if item_id yields no results
 			if (results.length === 0) {
-				thisOrder.order_success = false;
-				thisOrder.order_status = "Item doesn't exist in database.";
-				reject(thisOrder.order_status);
-				return connection.end();
+				return reject("Item doesn't exist in database.");
 			}
 			// if out of stock
 			if (results[0].stock_quantity == null 
 				|| results[0].stock_quantity === 0) {
-					thisOrder.order_success = false;
-					thisOrder.order_status = 'Out of stock.';
-					reject(thisOrder.order_status);
-					return connection.end();
+					return reject('Out of stock.');
 			}
 			// if requested quantity is greater than what's in stock
 			if (thisOrder.requested_quantity > results[0].stock_quantity) {
-				console.log('insufficient stock');
-				thisOrder.order_success = false;
-				thisOrder.order_status = 'Insufficient stock.';
-				reject(thisOrder.order_status);
-				return connection.end();
+				return reject('Insufficient stock.');
 			}
 
 			thisOrder.updateDatabase().then(function(){
@@ -77,20 +64,17 @@ BamazonOrder.prototype.checkout = function () {
 				thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
 
 				// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
-				resolve(thisOrder);
+				return resolve(thisOrder);
 
 			// catch defaults to server connection error
-			}).catch(function(){
-				thisOrder.order_success = false;
-				thisOrder.order_status = 'Server connection error';
-				reject(thisOrder.order_status);
-				return connection.end();
+			}).catch(function(errMsg){
+				return reject(errMsg);
 			});						
 		}); // end of select query
 	}); // end of Promise
 }; // end of checkout()
 
-BamazonOrder.prototype.updateDatabase = function () {	
+BamazonOrder.prototype.updateDatabase = function () {
 	// saves 'this' object as more manageable variable
 	const thisOrder = this;
 
@@ -104,16 +88,13 @@ BamazonOrder.prototype.updateDatabase = function () {
 
 		// updates database by subtracting current stock_quantity by requested_quantity
 		connection.query(queryString, function(err, result){
-				if (err) {
-					reject();
-					throw err;
-				}
+			if (err) {
+				return reject('Server connection error.');
+			}
 
-				console.log('changed ' + result.changedRows + ' rows');
+			console.log('changed ' + result.changedRows + ' rows');
 
-				resolve();
-
-				return connection.end();
+			return resolve();
 			} // end of callback
 		); // end of update query
 	}); // end of Promise

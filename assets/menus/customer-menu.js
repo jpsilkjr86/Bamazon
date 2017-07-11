@@ -180,7 +180,7 @@ var customerMenu = {
 
 					}).catch(function(failureMessage){
 						// if the checkout was unsuccessful, display reason, return to main menu
-						console.log('\nSorry, but we were unable to process your purchase.\n'
+						console.log("\nWe're sorry, but we were unable to process your purchase.\n"
 							+ '\nReason for failure: ' + failureMessage + '\n');
 
 						return customerMenu.main();
