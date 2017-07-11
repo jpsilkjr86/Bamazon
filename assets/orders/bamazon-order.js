@@ -1,7 +1,7 @@
 // imports bamazonDB for mysql query functionality
-var bamazonDB = require('../db-mng/bamazon-db-mng.js');
+const bamazonDB = require('../db-mng/bamazon-db-mng.js');
 
-var BamazonOrder = function (item_id=0, requested_quantity=0, product_name='', price=0, 
+let BamazonOrder = function (item_id=0, requested_quantity=0, product_name='', price=0, 
 	department_name='', total_cost=0, order_success=false, order_status=null) {
 	
 	// these are the first items that will be received

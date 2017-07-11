@@ -1,9 +1,9 @@
 // imports keys for password validation
-var keys = require('../keys/keys.js');
+const keys = require('../keys/keys.js');
 
 // imports mysql npm and establishes connection
-var mysql = require('mysql');
-var connection = mysql.createConnection({
+const mysql = require('mysql');
+const connection = mysql.createConnection({
 	host: 'localhost',
 	port: 3306,
 	user: 'root',
@@ -12,7 +12,7 @@ var connection = mysql.createConnection({
 });
 
 // database management Object to be exported
-var bamazonDB = {
+let bamazonDB = {
 	// asyncrhounous method returning Promise with success/fail messages
 	connect: function() {		
 		return new Promise(function(resolve, reject) {
