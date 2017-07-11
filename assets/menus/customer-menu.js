@@ -97,8 +97,100 @@ var customerMenu = {
 
 		// prompt for listing all items on Bamazon and purchasing by id
 		listAllAndBuy: function() {
-			console.log('\n======= BROWSE ALL ITEMS =======\n');
+			// sends SQL query string and values array to bamazonDB.getTable()
 			// Displays all available products (item_id, product_name, price)
+			bamazonDB.getTable(
+				'SELECT ?? FROM products',
+				[['item_id', 'product_name', 'price']]
+			// receives products from promise resolve 
+			).then(function(products){
+
+				console.log('\n======= BROWSE ALL ITEMS =======\n');
+
+				// loops through products and displays info
+				for (let i = 0; i < products.length; i++) {
+					console.log('Item Id: ' + products[i].item_id 
+						+ ' | ' + products[i].product_name
+						+ ' | $' + products[i].price);
+				}
+
+				console.log('\nWhat would you like to purchase today?\n');
+
+				// Prompt 1: ask user to enter the item_id of the product they would like to purchase
+				prompt([
+				{
+					type: 'input',
+					message: 'Item ID:',
+					name: 'requested_id',
+					validate: function(str) {
+						if (isNaN(str)) {
+							console.log('\n\nPlease enter a valid number.\n');
+							return false;
+						}
+						if (parseInt(str) < 1) {
+							console.log('\n\nInputs must be greater than zero.\n');
+							return false;
+						}
+						return true;
+					},
+					filter: function(str) {
+						return parseInt(str.trim());
+					}
+				},{ 
+				// Prompt 2: ask how many items they'd like to purchase
+					type: 'input',
+					message: 'Quantity:',
+					name: 'requested_quantity',
+					validate: function(str) {
+						if (isNaN(str)) {
+							console.log('\nPlease enter a valid number.\n');
+							return false;
+						}
+						if (parseInt(str) < 1) {
+							console.log('\n\nInputs must be greater than zero.\n');
+							return false;
+						}
+						return true;
+					},
+					filter: function(str) {
+						return parseInt(str.trim());
+					}
+				}
+				// promise resolve handler for prompt
+				]).then(function(answers){
+
+					// starts a newOrder object
+					const newOrder = 
+						new BamazonOrder(answers.requested_id, answers.requested_quantity);
+
+					// checkout function returns a promise.
+					newOrder.checkout().then(function(orderDetails){
+						// if the checkout is successful, then do this
+						console.log('\nYour purchase was successful!\n'
+							+ '\n ======= ORDER DETAILS: ======= \n'
+							+ '\nItem ID: ' + orderDetails.item_id
+							+ '\nProduct: ' + orderDetails.product_name
+							+ '\nDepartment: ' + orderDetails.department_name
+							+ '\nUnit Price: ' + orderDetails.price
+							+ '\nQuantity: ' + orderDetails.requested_quantity
+							+ '\nPurchase Total: ' + orderDetails.total_cost);
+
+						return customerMenu.main();
+
+					}).catch(function(failureMessage){
+						// if the checkout was unsuccessful, display reason, return to main menu
+						console.log("\nWe're sorry, but we were unable to process your purchase.\n"
+							+ '\nReason for failure: ' + failureMessage + '\n');
+
+						return customerMenu.main();
+					});  // end of newOrder.checkout() 
+				}); // end of prompt()
+			}).catch(function(errMsg){
+				return console.log(errMsg);
+			}); // end of getTable promise handlers
+			/*
+				
+			
 			connection.query('SELECT ?? FROM products', [['item_id', 'product_name', 'price']], function(err, results) {
 
 				if (err) {
@@ -187,6 +279,7 @@ var customerMenu = {
 					});  // end of newOrder.checkout() 
 				}); // end of prompt()
 			});	// end of connection.query()
+			*/
 		}, // end of customerMenu.purchase.listAllAndBuy()
 
 		// menu for browsing by department

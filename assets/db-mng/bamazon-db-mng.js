@@ -26,6 +26,17 @@ var bamazonDB = {
 			});
 		});			
 	}, // end of bamazonDB.connect
+	// getTable receives a SQL queryStr and queryValAry as arguments, returns promise
+	getTable: function(queryStr, queryValAry) {
+		return new Promise(function(resolve, reject)  {
+			connection.query(queryStr, queryValAry, function(err, res) {
+				if (err) {
+					return reject(err);
+				}
+				return resolve(res);
+			});
+		});
+	},
 	quit: function() {
 		return new Promise(function(resolve, reject) {
 			// attempts connection to mysql server. 
