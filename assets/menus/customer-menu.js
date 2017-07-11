@@ -3,12 +3,11 @@ const inquirer = require('inquirer');
 const prompt = inquirer.createPromptModule();
 
 // imports Table constructor from cli-table npm
-const Table = require('cli-table');
+let Table = require('cli-table');
 
 // imports custom modules. bamazonDB for back-end database mng,
 // BamazonOrder for constructor of new orders
 const bamazonDB = require('../db-mng/bamazon-db-mng.js');
-
 const BamazonOrder = require('../orders/bamazon-order.js');
 
 // customerMenu object, to be exported as a module
@@ -99,12 +98,24 @@ const customerMenu = {
 
 				console.log('\n======= BROWSE ALL ITEMS =======\n');
 
-				// loops through products and displays info
+				let table = new Table({
+					head: ['Item ID', 'Product Name', 'Price'],
+					// colWidths: [10, 60, 10],
+					chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
+			         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
+			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
+			         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
+
+				});
+
+				// loops through products and pushes info onto cli-table
 				for (let i = 0; i < products.length; i++) {
-					console.log('Item Id: ' + products[i].item_id 
-						+ ' | ' + products[i].product_name
-						+ ' | $' + products[i].price);
+					table.push([
+						products[i].item_id, products[i].product_name, '$' + products[i].price
+					]);
 				}
+				// converts table to a string
+				console.log(table.toString());
 
 				console.log('\nWhat would you like to purchase today?\n');
 
