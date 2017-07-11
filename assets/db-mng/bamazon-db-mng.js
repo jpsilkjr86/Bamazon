@@ -57,6 +57,21 @@ var bamazonDB = {
 			});
 		});
 	},
+	update: function(queryStr, queryValAry) {
+		// update returns promise which handles resolve / reject upon completion
+		return new Promise(function(resolve, reject) {
+			// updates database by subtracting current stock_quantity by requested_quantity
+			connection.query(queryStr, queryValAry, function(err, result){
+				if (err) {
+					return reject('Server connection error.');
+				}
+
+				console.log(result);
+
+				return resolve('changed ' + result.changedRows + ' rows');
+			}); // end of query
+		}); // end of promise
+	}, // end of update()
 	quit: function() {
 		return new Promise(function(resolve, reject) {
 			// attempts connection to mysql server. 
