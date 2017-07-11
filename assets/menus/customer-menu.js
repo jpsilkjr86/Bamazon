@@ -2,37 +2,37 @@
 var inquirer = require('inquirer');
 var prompt = inquirer.createPromptModule();
 
-// imports keys for password validation
-var keys = require('../keys/keys.js');
+// // imports keys for password validation
+// var keys = require('../keys/keys.js');
 
-// imports mysql npm and establishes connection
-var mysql = require('mysql');
-var connection = mysql.createConnection({
-	host: 'localhost',
-	port: 3306,
-	user: 'root',
-	password: keys.pw.mysqlpw,
-	database: 'bamazon'
-});
+// // imports mysql npm and establishes connection
+// var mysql = require('mysql');
+// var connection = mysql.createConnection({
+// 	host: 'localhost',
+// 	port: 3306,
+// 	user: 'root',
+// 	password: keys.pw.mysqlpw,
+// 	database: 'bamazon'
+// });
+
+var bamazonDB = require('../db-mng/bamazon-db-mng.js');
 
 var BamazonOrder = require('../orders/bamazon-order.js');
 
 // customerMenu object, to be exported as a module
 var customerMenu = {
 	// initialization method for customerMenu -- 
-	// checks if server connection can be established before proceeding.
+	// checks if Bamazon server connection can be established before proceeding.
 	initialize: function() {
 		// attempts connection to mysql server. if it fails, program ends.
 		// else, goes to customerMenu.main()
-		connection.connect(function(err) {
-			if (err) {
-				console.log('Error connecting to Bamazon: ' + err.stack);
-				return;
-			}
+		bamazonDB.connect().then(function(connectMsg){
 			// proceeds to customerMenu.main() if connection is successful
-			console.log('connected as id ' + connection.threadId
-				+ '\n\n*************** Welcome to Bamazon! ***************\n');
+			console.log('\n' + connectMsg + 
+				'\n\n*************** Welcome to Bamazon! ***************\n');
 			return customerMenu.main();
+		}).catch(function(errMsg){
+			return console.log(errMsg);
 		});
 	}, // end of customerMenu.intitialize()
 
@@ -200,9 +200,12 @@ var customerMenu = {
 
 	// function for quitting the customer menu
 	quit: function() {
-		console.log('\nThank you for shopping with Bamazon! Good bye...\n');
-		connection.end()
-		return;
+		// handles promise returned from bamazonDB.quit()
+		bamazonDB.quit().then(function(){
+			return console.log('\nThank you for shopping with Bamazon! Good bye...\n');
+		}).catch(function(errMsg){
+			return console.log(errMsg);
+		});
 	} // end of customerMenu.quit()
 	
 }; // end of customerMenu object
