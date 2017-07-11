@@ -26,52 +26,55 @@ let bamazonDB = {
 			});
 		});			
 	}, // end of bamazonDB.connect
-	// getTable receives a SQL queryStr and queryValAry as arguments, returns promise
-	getTable: function(queryStr, queryValAry) {
+	// simple SQL query method, receives a SQL queryStr & queryValAry as arguments, returns promise
+	query: function(queryStr, queryValAry) {
+		// promise which handles resolve / reject upon completion
 		return new Promise(function(resolve, reject)  {
 			connection.query(queryStr, queryValAry, function(err, res) {
 				if (err) {
-					return reject(err);
+					return reject('Server connection error');
 				}
 				return resolve(res);
 			});
 		});
-	},
-	getProductById: function(productId) {
-		return new Promise(function(resolve, reject)  {
-			connection.query('SELECT * FROM products WHERE item_id=' + productId, function(err, res) {
-				// if connection error
-				if (err) {
-					return reject('Server connection error');
-				}
-				// if item_id yields no results
-				if (res.length === 0) {
-					return reject("Item doesn't exist in database.");
-				}
-				// if out of stock
-				if (res[0].stock_quantity == null 
-					|| res[0].stock_quantity === 0) {
-						return reject('Out of stock.');
-				}
-				return resolve(res[0]);
+	}, // end of bamazonDB.query()
+	products: {
+		getById: function(productId) {
+			return new Promise(function(resolve, reject)  {
+				connection.query('SELECT * FROM products WHERE item_id=' + productId, function(err, res) {
+					// if connection error
+					if (err) {
+						return reject('Server connection error');
+					}
+					// if item_id yields no results
+					if (res.length === 0) {
+						return reject("Item doesn't exist in database.");
+					}
+					// if out of stock
+					if (res[0].stock_quantity == null 
+						|| res[0].stock_quantity === 0) {
+							return reject('Out of stock.');
+					}
+					return resolve(res[0]);
+				});
 			});
-		});
-	},
-	update: function(queryStr, queryValAry) {
-		// update returns promise which handles resolve / reject upon completion
-		return new Promise(function(resolve, reject) {
-			// updates database by subtracting current stock_quantity by requested_quantity
-			connection.query(queryStr, queryValAry, function(err, result){
-				if (err) {
-					return reject('Server connection error.');
-				}
+		}, // end of getById()
+		update: function(queryStr, queryValAry) {
+			// update returns promise which handles resolve / reject upon completion
+			return new Promise(function(resolve, reject) {
+				// updates database by subtracting current stock_quantity by requested_quantity
+				connection.query(queryStr, queryValAry, function(err, result){
+					if (err) {
+						return reject('Server connection error.');
+					}
 
-				console.log(result);
+					console.log(result);
 
-				return resolve('changed ' + result.changedRows + ' rows');
-			}); // end of query
-		}); // end of promise
-	}, // end of update()
+					return resolve('changed ' + result.changedRows + ' rows');
+				}); // end of query
+			}); // end of promise
+		}, // end of update()
+	}, // end of bamazonDB.products subset object		
 	quit: function() {
 		return new Promise(function(resolve, reject) {
 			// attempts connection to mysql server. 

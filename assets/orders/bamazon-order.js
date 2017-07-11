@@ -25,7 +25,7 @@ BamazonOrder.prototype.checkout = function () {
 	//        resulting in negative stock_quantity
 	return new Promise(function(resolve, reject) {
 		// checkout continues if it's able to retrieve product info from database if it's in stock
-		bamazonDB.getProductById(thisOrder.item_id).then(function(product) {
+		bamazonDB.products.getById(thisOrder.item_id).then(function(product) {
 			
 			// if product.stock_quantity < thisOrder.requested_quantity, do not proceed
 			if (product.stock_quantity < thisOrder.requested_quantity) {
@@ -40,7 +40,7 @@ BamazonOrder.prototype.checkout = function () {
 
 			// updates database after successfully retrieving product and if product is available.
 			// empty array is sent as argument since no values are sent with queryString.
-			bamazonDB.update(queryString, []).then(function(){
+			bamazonDB.products.update(queryString, []).then(function(){
 				// these values are updated after mysql query. default values set in paramters above.
 				thisOrder.product_name = product.product_name;
 				thisOrder.price = product.price;

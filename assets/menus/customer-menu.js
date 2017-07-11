@@ -88,9 +88,9 @@ const customerMenu = {
 
 		// prompt for listing all items on Bamazon and purchasing by id
 		listAllAndBuy: function() {
-			// sends SQL query string and values array to bamazonDB.getTable()
+			// sends SQL query string and values array to bamazonDB.query()
 			// Displays all available products (item_id, product_name, price)
-			bamazonDB.getTable(
+			bamazonDB.query(
 				'SELECT ?? FROM products',
 				[['item_id', 'product_name', 'price']]
 			// receives products from promise resolve 
@@ -105,7 +105,6 @@ const customerMenu = {
 			         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
 			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
 			         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
-
 				});
 
 				// loops through products and pushes info onto cli-table
@@ -190,7 +189,7 @@ const customerMenu = {
 				}); // end of prompt()
 			}).catch(function(errMsg){
 				return console.log(errMsg);
-			}); // end of getTable promise handlers
+			}); // end of query promise handlers
 		}, // end of customerMenu.purchase.listAllAndBuy()
 
 		// menu for browsing by department
