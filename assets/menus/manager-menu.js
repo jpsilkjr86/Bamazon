@@ -225,6 +225,9 @@ const managerMenu = {
 				message: 'Department:',
 				name: 'department_name',
 				filter: function(str) {
+					if (str === '') {
+						return null;
+					}
 					return str.trim();
 				}
 			},{
@@ -233,20 +236,26 @@ const managerMenu = {
 				message: 'Price: $',
 				name: 'price',
 				filter: function(str) {
-					return str.trim();
+					if (str === '') {
+						return null;
+					}
+					return parseInt(str.trim());
 				},
 				validate: function(value) {
+					if (value === null) {
+						return true;
+					}
 					if (isNaN(value)) {
 						console.log('\n\nPrice must be a valid number.\n'
 							+ 'If it is yet to be determined, just leave the field blank.\n');
 						return false;
 					}
-					if (parseInt(value) === 0) {
+					if (value === 0) {
 						console.log('\n\nPrice may not be equal to zero.\n'
 							+ 'If it is yet to be determined, just leave the field blank.\n');
 						return false;
 					}
-					if (parseInt(value) < 0) {
+					if (value < 0) {
 						console.log('\n\nPrice may not be less than zero.\n'
 							+ 'If it is yet to be determined, just leave the field blank.\n');
 						return false;
@@ -259,15 +268,21 @@ const managerMenu = {
 				message: 'Starting Stock Quantity:',
 				name: 'stock_quantity',
 				filter: function(str) {
-					return str.trim();
+					if (str === '') {
+						return null;
+					}
+					return parseInt(str.trim());
 				},
 				validate: function(value) {
+					if (value === null) {
+						return true;
+					}
 					if (isNaN(value)) {
 						console.log('\n\nQuantity must be a valid number.\n'
 							+ 'If it is yet to be determined, just enter zero or leave it blank.\n');
 						return false;
 					}
-					if (parseInt(value) < 0) {
+					if (value < 0) {
 						console.log('\n\nQuantity may not be less than zero.\n'
 							+ 'If it is yet to be determined, just enter zero or leave it blank.\n');
 						return false;
@@ -294,6 +309,7 @@ const managerMenu = {
 						console.log('\n\nReturning to the main menu...\n');
 						return managerMenu.main();
 					}
+					console.log(answersOne);
 					console.log('\n\nReturning to the main menu...\n');
 					return managerMenu.main();
 						
