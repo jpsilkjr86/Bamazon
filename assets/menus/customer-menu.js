@@ -71,18 +71,19 @@ const customerMenu = {
 				name: 'purchaseMenuChoice'
 			}
 			]).then(function(answers){
-				// proceed to the next step according to the user's choice
-				if (answers.purchaseMenuChoice === 'List all items and make a purchase.') {
-					return customerMenu.purchase.listAllAndBuy();
+				// proceeds to the next step according to the user's choice
+				switch(answers.purchaseMenuChoice) {
+					case 'List all items and make a purchase.':
+						customerMenu.purchase.listAllAndBuy();
+						break;
+					case 'Browse items by department.':
+						customerMenu.purchase.browseByDept();
+						break;
+					case 'Return to the main menu.':
+						customerMenu.main();
+						break;
 				}
-
-				if (answers.purchaseMenuChoice === 'Browse items by department.') {
-					return customerMenu.purchase.browseByDept();
-				}
-
-				if (answers.purchaseMenuChoice === 'Return to the main menu.') {
-					return customerMenu.main();
-				}
+				return;
 			});
 		}, // end of customerMenu.purchase.main()
 
