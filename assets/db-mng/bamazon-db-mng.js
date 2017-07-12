@@ -50,11 +50,6 @@ let bamazonDB = {
 					if (res.length === 0) {
 						return reject("Item doesn't exist in database.");
 					}
-					// if out of stock
-					if (res[0].stock_quantity == null
-						|| res[0].stock_quantity === 0) {
-							return reject('Out of stock.');
-					}
 					return resolve(res[0]);
 				});
 			});

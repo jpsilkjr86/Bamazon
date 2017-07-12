@@ -26,6 +26,10 @@ BamazonOrder.prototype.checkout = function () {
 	return new Promise(function(resolve, reject) {
 		// checkout continues if it's able to retrieve product info from database if it's in stock
 		bamazonDB.products.getById(thisOrder.item_id).then(function(product) {			
+			// if product is out of stock, do not proceed
+			if (product.stock_quantity == null || product.stock_quantity === 0) {
+				return reject('Out of stock.');
+			}
 			// if product.stock_quantity < thisOrder.requested_quantity, do not proceed
 			if (product.stock_quantity < thisOrder.requested_quantity) {
 				return reject('Insufficient stock.');
