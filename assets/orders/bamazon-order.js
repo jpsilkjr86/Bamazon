@@ -48,8 +48,8 @@ BamazonOrder.prototype.checkout = function () {
 				// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
 				return resolve(thisOrder);
 			// catch defaults to server connection error
-			}).catch(function(errMsg){
-				return reject(errMsg);
+			}).catch(function(failureMessage){
+				return reject(failureMessage);
 			});	// end of products.reduceStockBy() promise
 		}).catch(function(failureMessage){
 			// passes failureMessage parameter from one promise to the next
