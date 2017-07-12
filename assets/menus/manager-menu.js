@@ -86,7 +86,7 @@ const managerMenu = {
 						products[i].item_id,
 						products[i].product_name,
 						products[i].department_name,
-						products[i].price,
+						'$' + products[i].price,
 						products[i].stock_quantity
 					]);
 				}
@@ -118,7 +118,7 @@ const managerMenu = {
 						products[i].item_id,
 						products[i].product_name,
 						products[i].department_name,
-						products[i].price,
+						'$' + products[i].price,
 						products[i].stock_quantity
 					]);
 				}
@@ -186,16 +186,17 @@ const managerMenu = {
 					bamazonDB.products.addStock(
 						answers.requested_id, answers.quantity_to_increase
 					).then(function(result){
-						console.log(result);
+						console.log('\n\nProduct stock successfully updated!\n'
+							+ 'Returning to the main menu...\n');
 						return managerMenu.main();
 					}).catch(function(errMsg){
 						console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ 'Reason: ' + errMsg);
+							+ 'Reason: ' + errMsg + '\n');
 						return managerMenu.main();
 					}); // end of addStock() promise
 				}).catch(function(errMsg){
 					console.log("\nWe're sorry, but we were unable to process your request.\n"
-						+ 'Reason: ' + errMsg);
+						+ 'Reason: ' + errMsg + '\n');
 					return managerMenu.main();
 				}); // end of getById() promise
 			}); // end of prompt() promise
@@ -309,10 +310,23 @@ const managerMenu = {
 						console.log('\n\nReturning to the main menu...\n');
 						return managerMenu.main();
 					}
-					console.log(answersOne);
-					console.log('\n\nReturning to the main menu...\n');
-					return managerMenu.main();
-						
+					// sends answersOne to bamazonDB.products.addNew()
+					bamazonDB.products.addNew(
+						answersOne.product_name,
+						answersOne.department_name,
+						answersOne.price,
+						answersOne.stock_quantity
+					).then(function(results){
+						console.log('\n\nProduct successfully added!\n'
+							+ 'Returning to the main menu...\n');
+						return managerMenu.main();
+
+					}).catch(function(errMsg){
+						console.log("\nWe're sorry, but we were unable to process your request.\n"
+							+ 'Reason: ' + errMsg + '\n');
+						return managerMenu.main();
+
+					});	// end of bamazonDB.products.addNew() promise
 				}); // end of second prompt() promise
 			}); // end of first prompt() promise
 		} // end of productMng.addNewProduct()

@@ -78,6 +78,7 @@ let bamazonDB = {
 				); // end of query
 			}); // end of Promise
 		}, // end of products.reduceStock()
+		// function to add stock to existing products in inventory
 		addStock: function(item_id, qty_to_increase) {
 			// returns promise which handles resolve / reject upon completion
 			return new Promise(function(resolve, reject) { 
@@ -85,18 +86,37 @@ let bamazonDB = {
 				connection.query(
 					'UPDATE products SET stock_quantity=stock_quantity+? WHERE item_id=?',
 					[qty_to_increase, item_id],
-					function(err, result){					
+					function(err, res){					
 						if (err) {
 							return reject('Server connection error.');
 						}
-						if (result.changedRows === 0) {
+						if (res.changedRows === 0) {
 							return reject('Unable to locate product.');
 						}
-						return resolve('changed ' + result.changedRows + ' rows');
+						return resolve('changed ' + res.changedRows + ' row(s)!');
 					} // end of callback
 				); // end of query
 			}); // end of Promise
-		} // end of products.addStock()
+		}, // end of products.addStock()
+		// function to add new products
+		addNew: function(product_name, department_name, price, stock_quantity) {
+			// returns promise
+			return new Promise(function(resolve, reject) {
+				let queryString = 'INSERT INTO products (product_name, department_name,'
+					+ ' price, stock_quantity) VALUES (?)';
+				let queryValAry = [[product_name, department_name, price, stock_quantity]];
+				// matches arguments with query string
+				connection.query(queryString, queryValAry, function(err, res){
+					if (err) {
+						return reject('Server processing error.');
+					}
+					if (res.affectedRows === 0) {
+						return reject('Server processing error.')
+					}
+					return resolve('inserted ' + res.affectedRows + ' row(s)!');
+				});
+			}); // end of Promse
+		}
 	}, // end of bamazonDB.products subset object		
 	quit: function() {
 		return new Promise(function(resolve, reject) {
