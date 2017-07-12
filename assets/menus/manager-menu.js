@@ -276,14 +276,29 @@ const managerMenu = {
 				}
 			}
 			// promise resolve handler for prompt()
-			]).then(function(answers){
+			]).then(function(answersOne){
+				console.log('\nReview new product information:\n'
+					+ '\nProduct: ' + answersOne.product_name
+					+ '\nDepartment: ' + answersOne.department_name
+					+ '\nPrice: $' + answersOne.price
+					+ '\nStarting Stock Quantity: ' + answersOne.stock_quantity + '\n');
 				// prompt to confirm details
-				console.log(answers);
-				return managerMenu.main();
+				prompt([{
+					type: 'confirm',
+					message: 'Is the above information correct?',
+					name: 'confirm',
+					default: false
+				}]).then(function(answersTwo){
 					// if no, return to main main
-
-					// add product to Bamazon database
-			}); // end of prompt() promise
+					if (answersTwo.confirm === false) {
+						console.log('\n\nReturning to the main menu...\n');
+						return managerMenu.main();
+					}
+					console.log('\n\nReturning to the main menu...\n');
+					return managerMenu.main();
+						
+				}); // end of second prompt() promise
+			}); // end of first prompt() promise
 		} // end of productMng.addNewProduct()
 	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
