@@ -54,18 +54,19 @@ let bamazonDB = {
 				});
 			});
 		}, // end of getById()
-		reduceStock: function(item_id, requested_quantity) {
+		transaction: function(item_id, requested_quantity) {
 			// returns promise which handles resolve / reject upon completion
 			return new Promise(function(resolve, reject) {
 				// instantiates locally scoped query string. extra condition
 				// 'AND stock_quantity-?>=0' ensures the function will not reduce stock to 
 				// a negative number at the point of sale.
-				let queryStr = 'UPDATE products SET stock_quantity=stock_quantity-?'
-				 + ' WHERE item_id=? AND stock_quantity-?>=0'
+				let queryStr = 'UPDATE products SET stock_quantity = stock_quantity - ?,'
+				 + ' product_sales = product_sales + (price * ?)'
+				 + ' WHERE item_id=? AND stock_quantity - ? >= 0'
 				// updates database by subtracting current stock_quantity by requested_quantity
 				connection.query(
 					queryStr,
-					[requested_quantity, item_id, requested_quantity],
+					[requested_quantity, requested_quantity, item_id, requested_quantity],
 					function(err, result){					
 						if (err) {
 							return reject('Server connection error.');
@@ -77,7 +78,7 @@ let bamazonDB = {
 					} // end of callback
 				); // end of query
 			}); // end of Promise
-		}, // end of products.reduceStock()
+		}, // end of products.transaction()
 		// function to add stock to existing products in inventory
 		addStock: function(item_id, qty_to_increase) {
 			// returns promise which handles resolve / reject upon completion

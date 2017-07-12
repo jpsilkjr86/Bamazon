@@ -36,7 +36,7 @@ BamazonOrder.prototype.checkout = function () {
 			}
 			// updates products table in database after successfully retrieving 
 			// product info and if product is available.
-			bamazonDB.products.reduceStock(
+			bamazonDB.products.transaction(
 				thisOrder.item_id, thisOrder.requested_quantity
 			).then(function(){
 				// these values are updated after mysql query. default values set in paramters above.
@@ -54,7 +54,7 @@ BamazonOrder.prototype.checkout = function () {
 			// catch defaults to server connection error
 			}).catch(function(failureMessage){
 				return reject(failureMessage);
-			});	// end of products.reduceStock() promise
+			});	// end of products.transaction() promise
 		}).catch(function(failureMessage){
 			// passes failureMessage parameter from one promise to the next
 			return reject(failureMessage);
