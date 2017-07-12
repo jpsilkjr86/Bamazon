@@ -160,7 +160,7 @@ const managerMenu = {
 				name: 'quantity_to_increase',
 				validate: function(str) {
 					if (isNaN(str)) {
-						console.log('\nPlease enter a valid number.\n');
+						console.log('\n\nPlease enter a valid number.\n');
 						return false;
 					}
 					if (parseInt(str) < 0) {
@@ -175,6 +175,11 @@ const managerMenu = {
 			}
 			// promise resolve handler for prompt()
 			]).then(function(answers){
+				// if quantity_to_increase is zero, return to main menu
+				if (answers.quantity_to_increase === 0) {
+					return managerMenu.main();
+				}
+
 				// first finds the product by id to make sure it exists before proceeding
 				bamazonDB.products.getById(answers.requested_id).then(function(product){
 					// adds stock after product is retrieved from the database
@@ -184,12 +189,12 @@ const managerMenu = {
 						console.log(result);
 						return managerMenu.main();
 					}).catch(function(errMsg){
-						console.log("We're sorry, but we were unable to process your request.\n"
+						console.log("\nWe're sorry, but we were unable to process your request.\n"
 							+ 'Reason: ' + errMsg);
 						return managerMenu.main();
 					}); // end of addStock() promise
 				}).catch(function(errMsg){
-					console.log("We're sorry, but we were unable to process your request.\n"
+					console.log("\nWe're sorry, but we were unable to process your request.\n"
 						+ 'Reason: ' + errMsg);
 					return managerMenu.main();
 				}); // end of getById() promise
@@ -197,7 +202,88 @@ const managerMenu = {
 		}, // end of productMng.addToInventory()
 		addNewProduct: function() {
 			console.log('\n ======= ADD NEW PRODUCT =======\n');
-			return managerMenu.main();
+			console.log("\nPlease enter information about the product you'd like to add.\n");
+			// Prompt 1: ask user to enter the product name
+			prompt([
+			{
+				type: 'input',
+				message: 'Product Name (Required):',
+				name: 'product_name',
+				filter: function(str) {
+					return str.trim();
+				},
+				validate: function(str) {
+					if (str == null || str == '') {
+						console.log('\n\nRequired Input - empty string not permitted.\n');
+						return false;
+					}
+					return true;
+				}
+			},{ 
+			// Prompt 2: ask name of department the product should be placed in
+				type: 'input',
+				message: 'Department:',
+				name: 'department_name',
+				filter: function(str) {
+					return str.trim();
+				}
+			},{
+			// Prompt 3: ask price of product
+				type: 'input',
+				message: 'Price: $',
+				name: 'price',
+				filter: function(str) {
+					return str.trim();
+				},
+				validate: function(value) {
+					if (isNaN(value)) {
+						console.log('\n\nPrice must be a valid number.\n'
+							+ 'If it is yet to be determined, just leave the field blank.\n');
+						return false;
+					}
+					if (parseInt(value) === 0) {
+						console.log('\n\nPrice may not be equal to zero.\n'
+							+ 'If it is yet to be determined, just leave the field blank.\n');
+						return false;
+					}
+					if (parseInt(value) < 0) {
+						console.log('\n\nPrice may not be less than zero.\n'
+							+ 'If it is yet to be determined, just leave the field blank.\n');
+						return false;
+					}
+					return true;
+				}
+			},{
+			// Prompt 4: ask starting stock quantity
+				type: 'input',
+				message: 'Starting Stock Quantity:',
+				name: 'stock_quantity',
+				filter: function(str) {
+					return str.trim();
+				},
+				validate: function(value) {
+					if (isNaN(value)) {
+						console.log('\n\nQuantity must be a valid number.\n'
+							+ 'If it is yet to be determined, just enter zero or leave it blank.\n');
+						return false;
+					}
+					if (parseInt(value) < 0) {
+						console.log('\n\nQuantity may not be less than zero.\n'
+							+ 'If it is yet to be determined, just enter zero or leave it blank.\n');
+						return false;
+					}
+					return true;
+				}
+			}
+			// promise resolve handler for prompt()
+			]).then(function(answers){
+				// prompt to confirm details
+				console.log(answers);
+				return managerMenu.main();
+					// if no, return to main main
+
+					// add product to Bamazon database
+			}); // end of prompt() promise
 		} // end of productMng.addNewProduct()
 	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
