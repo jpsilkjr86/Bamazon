@@ -82,7 +82,26 @@ let bamazonDB = {
 					} // end of callback
 				); // end of query
 			}); // end of Promise
-		} // end of products.reduceStockBy()
+		}, // end of products.reduceStockBy()
+		addStock: function(item_id, qty_to_increase) {
+			// returns promise which handles resolve / reject upon completion
+			return new Promise(function(resolve, reject) { 
+				// updates database by adding current stock_quantity qty_to_increase
+				connection.query(
+					'UPDATE products SET stock_quantity=stock_quantity+? WHERE item_id=?',
+					[qty_to_increase, item_id],
+					function(err, result){					
+						if (err) {
+							return reject('Server connection error.');
+						}
+						if (result.changedRows === 0) {
+							return reject (result);
+						}
+						return resolve('changed ' + result.changedRows + ' rows');
+					} // end of callback
+				); // end of query
+			}); // end of Promise
+		}
 	}, // end of bamazonDB.products subset object		
 	quit: function() {
 		return new Promise(function(resolve, reject) {

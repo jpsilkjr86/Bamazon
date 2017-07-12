@@ -130,8 +130,14 @@ const managerMenu = {
 			}); // end of bamazonDB.query() promise
 		}, // end of productMng.viewLowInventory()
 		addToInventory: function() {
-			console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
-			return managerMenu.main();
+			bamazonDB.products.addStock(1, 1).then(function(result){
+				console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
+				console.log(result);
+				return managerMenu.main();
+			}).catch(function(errMsg){
+				console.log(errMsg);
+				return managerMenu.main();
+			});
 		}, // end of productMng.addToInventory()
 		addNewProduct: function() {
 			console.log('\n ======= ADD NEW PRODUCT =======\n');
