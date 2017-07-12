@@ -54,7 +54,7 @@ let bamazonDB = {
 				});
 			});
 		}, // end of getById()
-		reduceStockBy: function(item_id, requested_quantity) {
+		reduceStock: function(item_id, requested_quantity) {
 			// returns promise which handles resolve / reject upon completion
 			return new Promise(function(resolve, reject) {
 				// instantiates locally scoped query string. extra condition
@@ -77,7 +77,7 @@ let bamazonDB = {
 					} // end of callback
 				); // end of query
 			}); // end of Promise
-		}, // end of products.reduceStockBy()
+		}, // end of products.reduceStock()
 		addStock: function(item_id, qty_to_increase) {
 			// returns promise which handles resolve / reject upon completion
 			return new Promise(function(resolve, reject) { 
@@ -96,7 +96,7 @@ let bamazonDB = {
 					} // end of callback
 				); // end of query
 			}); // end of Promise
-		}
+		} // end of products.addStock()
 	}, // end of bamazonDB.products subset object		
 	quit: function() {
 		return new Promise(function(resolve, reject) {
