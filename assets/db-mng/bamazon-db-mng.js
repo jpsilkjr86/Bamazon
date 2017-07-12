@@ -51,7 +51,7 @@ let bamazonDB = {
 						return reject("Item doesn't exist in database.");
 					}
 					// if out of stock
-					if (res[0].stock_quantity == null 
+					if (res[0].stock_quantity == null
 						|| res[0].stock_quantity === 0) {
 							return reject('Out of stock.');
 					}
@@ -59,21 +59,24 @@ let bamazonDB = {
 				});
 			});
 		}, // end of getById()
-		update: function(queryStr, queryValAry) {
-			// update returns promise which handles resolve / reject upon completion
+		reduceStockBy: function(item_id, requested_quantity) {
+			// returns promise which handles resolve / reject upon completion
 			return new Promise(function(resolve, reject) {
 				// updates database by subtracting current stock_quantity by requested_quantity
-				connection.query(queryStr, queryValAry, function(err, result){
-					if (err) {
-						return reject('Server connection error.');
-					}
+				connection.query(
+					'UPDATE products SET stock_quantity=stock_quantity-? WHERE item_id=?', 
+					[requested_quantity, item_id],
+					function(err, result){					
+						if (err) {
+							return reject('Server connection error.');
+						}
+						console.log(result.changedRows);
 
-					console.log(result);
-
-					return resolve('changed ' + result.changedRows + ' rows');
-				}); // end of query
-			}); // end of promise
-		}, // end of update()
+						return resolve('changed ' + result.changedRows + ' rows');
+					} // end of callback
+				); // end of query
+			}); // end of Promise
+		} // end of products.reduceStockBy()
 	}, // end of bamazonDB.products subset object		
 	quit: function() {
 		return new Promise(function(resolve, reject) {

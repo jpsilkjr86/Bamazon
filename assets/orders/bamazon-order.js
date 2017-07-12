@@ -25,22 +25,16 @@ BamazonOrder.prototype.checkout = function () {
 	//        resulting in negative stock_quantity
 	return new Promise(function(resolve, reject) {
 		// checkout continues if it's able to retrieve product info from database if it's in stock
-		bamazonDB.products.getById(thisOrder.item_id).then(function(product) {
-			
+		bamazonDB.products.getById(thisOrder.item_id).then(function(product) {			
 			// if product.stock_quantity < thisOrder.requested_quantity, do not proceed
 			if (product.stock_quantity < thisOrder.requested_quantity) {
 				return reject('Insufficient stock.');
 			}
-
-			// creates a query string that sets the stock_quantity equal to the
-			// current stock_quantity minus this order's requested_quantity
-			// of the given item_id.
-			let queryString = 'UPDATE products SET stock_quantity=stock_quantity-'
-				+ thisOrder.requested_quantity + ' WHERE item_id=' + thisOrder.item_id;
-
-			// updates database after successfully retrieving product and if product is available.
-			// empty array is sent as argument since no values are sent with queryString.
-			bamazonDB.products.update(queryString, []).then(function(){
+			// updates products table in database after successfully retrieving 
+			// product info and if product is available.
+			bamazonDB.products.reduceStockBy(
+				thisOrder.item_id, thisOrder.requested_quantity
+			).then(function(){
 				// these values are updated after mysql query. default values set in paramters above.
 				thisOrder.product_name = product.product_name;
 				thisOrder.price = product.price;
@@ -53,17 +47,15 @@ BamazonOrder.prototype.checkout = function () {
 
 				// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
 				return resolve(thisOrder);
-
 			// catch defaults to server connection error
 			}).catch(function(errMsg){
 				return reject(errMsg);
-			});	
-
+			});	// end of products.reduceStockBy() promise
 		}).catch(function(failureMessage){
 			// passes failureMessage parameter from one promise to the next
 			return reject(failureMessage);
-		});
-	}); // end of Promise
+		}); // end of products.getById() promise
+	}); // end of returned Promise
 }; // end of checkout()
 
 module.exports = BamazonOrder;

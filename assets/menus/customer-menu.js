@@ -96,7 +96,7 @@ const customerMenu = {
 			// receives products from promise resolve 
 			).then(function(products){
 
-				console.log('\n======= BROWSE ALL ITEMS =======\n');
+				console.log('\n ======= BROWSE ALL ITEMS ======= \n');
 
 				let table = new Table({
 					head: ['Item ID', 'Product Name', 'Price'],
@@ -169,7 +169,7 @@ const customerMenu = {
 					newOrder.checkout().then(function(orderDetails){
 						// if the checkout is successful, then do this
 						console.log('\nYour purchase was successful!\n'
-							+ '\n ======= ORDER DETAILS: ======= \n'
+							+ '\n ******* ORDER DETAILS: ******* \n'
 							+ '\nItem ID: ' + orderDetails.item_id
 							+ '\nProduct: ' + orderDetails.product_name
 							+ '\nDepartment: ' + orderDetails.department_name
