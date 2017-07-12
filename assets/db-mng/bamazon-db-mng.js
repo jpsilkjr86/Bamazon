@@ -95,7 +95,7 @@ let bamazonDB = {
 							return reject('Server connection error.');
 						}
 						if (result.changedRows === 0) {
-							return reject (result);
+							return reject('Unable to locate product.');
 						}
 						return resolve('changed ' + result.changedRows + ' rows');
 					} // end of callback
