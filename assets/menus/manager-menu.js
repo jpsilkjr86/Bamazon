@@ -130,23 +130,70 @@ const managerMenu = {
 			}); // end of bamazonDB.query() promise
 		}, // end of productMng.viewLowInventory()
 		addToInventory: function() {
-			// first finds the product by id to make sure it exists before proceeding
-			bamazonDB.products.getById(3).then(function(product){
-				// adds stock after product is retrieved from the database
-				bamazonDB.products.addStock(123, 1).then(function(result){
-					console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
-					console.log(result);
-					return managerMenu.main();
+			console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
+			console.log("\nWhich item's stock would you like to add inventory to today?\n");
+			// Prompt 1: ask user to enter the item_id of the product they would
+			// like to add inventory to
+			prompt([
+			{
+				type: 'input',
+				message: 'Item ID:',
+				name: 'requested_id',
+				validate: function(str) {
+					if (isNaN(str)) {
+						console.log('\n\nPlease enter a valid number.\n');
+						return false;
+					}
+					if (parseInt(str) < 1) {
+						console.log('\n\nInput must be greater than zero.\n');
+						return false;
+					}
+					return true;
+				},
+				filter: function(str) {
+					return parseInt(str.trim());
+				}
+			},{ 
+			// Prompt 2: ask the quantity of stock to add
+				type: 'input',
+				message: 'Quantity to Increase:',
+				name: 'quantity_to_increase',
+				validate: function(str) {
+					if (isNaN(str)) {
+						console.log('\nPlease enter a valid number.\n');
+						return false;
+					}
+					if (parseInt(str) < 0) {
+						console.log('\n\nInput may not be less than zero.\n');
+						return false;
+					}
+					return true;
+				},
+				filter: function(str) {
+					return parseInt(str.trim());
+				}
+			}
+			// promise resolve handler for prompt()
+			]).then(function(answers){
+				// first finds the product by id to make sure it exists before proceeding
+				bamazonDB.products.getById(answers.requested_id).then(function(product){
+					// adds stock after product is retrieved from the database
+					bamazonDB.products.addStock(
+						answers.requested_id, answers.quantity_to_increase
+					).then(function(result){
+						console.log(result);
+						return managerMenu.main();
+					}).catch(function(errMsg){
+						console.log("We're sorry, but we were unable to process your request.\n"
+							+ 'Reason: ' + errMsg);
+						return managerMenu.main();
+					}); // end of addStock() promise
 				}).catch(function(errMsg){
-					console.log('afewaef' + errMsg);
+					console.log("We're sorry, but we were unable to process your request.\n"
+						+ 'Reason: ' + errMsg);
 					return managerMenu.main();
-				});
-			}).catch(function(errMsg){
-				console.log("We're sorry, but we were unable to process your request.\n"
-					+ 'Reason: ' + errMsg);
-				return managerMenu.main();
-			});
-				
+				}); // end of getById() promise
+			}); // end of prompt() promise
 		}, // end of productMng.addToInventory()
 		addNewProduct: function() {
 			console.log('\n ======= ADD NEW PRODUCT =======\n');
