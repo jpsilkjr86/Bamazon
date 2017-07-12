@@ -35,23 +35,55 @@ const managerMenu = {
 		{
 			type: 'list',
 			message: 'What can I help you with today?',
-			choices: ['a', 'Quit'],
+			choices: [
+				'View Products for Sale',
+				'View Low Inventory',
+				'Add to Existing Inventory',
+				'Add New Product',
+				'Quit'
+			],
 			name: 'mainMenuChoice'
 		}
 		]).then(function(answers){
-
-			if (answers.mainMenuChoice === 'a') {
-				// proceeds to purchase menu
-				return managerMenu.main();
+			switch (answers.mainMenuChoice) {
+				case 'View Products for Sale':
+					managerMenu.productMng.viewProductsForSale();
+					break;
+				case 'View Low Inventory':
+					managerMenu.productMng.viewLowInventory();
+					break;
+				case 'Add to Existing Inventory':
+					managerMenu.productMng.addToInventory();
+					break;
+				case 'Add New Product':
+					managerMenu.productMng.addNewProduct();
+					break;
+				case 'Quit':
+					managerMenu.quit();
+					break;
 			}
-
-			if (answers.mainMenuChoice === 'Quit') {
-				// proceeds to quit
-				return managerMenu.quit();
-			}				
+			return;
 		});
 	}, // end of managerMenu.main()
-
+	// managerMenu.productMng subset object
+	productMng: {
+		viewProductsForSale: function() {
+			console.log('\n ======= PRODUCTS FOR SALE =======\n');
+			return managerMenu.main();
+		},
+		viewLowInventory: function() {
+			console.log('\n ======= LOW INVENTORY PRODUCTS =======\n');
+			return managerMenu.main();
+		},
+		addToInventory: function() {
+			console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
+			return managerMenu.main();
+		},
+		addNewProduct: function() {
+			console.log('\n ======= ADD NEW PRODUCT =======\n');
+			return managerMenu.main();
+		}
+	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
 	quit: function() {
 		// handles promise returned from bamazonDB.quit()
