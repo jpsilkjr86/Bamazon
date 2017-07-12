@@ -45,6 +45,7 @@ const managerMenu = {
 			name: 'mainMenuChoice'
 		}
 		]).then(function(answers){
+			console.log(answers);
 			switch (answers.mainMenuChoice) {
 				case 'View Products for Sale':
 					managerMenu.productMng.viewProductsForSale();
@@ -68,21 +69,47 @@ const managerMenu = {
 	// managerMenu.productMng subset object
 	productMng: {
 		viewProductsForSale: function() {
-			console.log('\n ======= PRODUCTS FOR SALE =======\n');
-			return managerMenu.main();
-		},
+			console.log('view prod for sale');
+			// gets table of data from bamazonDB.query promise
+			bamazonDB.query('SELECT * FROM ??', ['products']).then(function(products){
+				console.log('\n ======= PRODUCTS FOR SALE =======\n');				
+				// instantiates table from cli-table node module
+				let table = new Table({
+					head: ['Item ID', 'Product Name', 'Department', 'Price', 'Stock Qty'],
+					chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
+			         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
+			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
+			         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
+				});
+				// loops through products and pushes onto cli-table
+				for (let i = 0; i < products.length; i++) {
+					table.push([
+						products[i].item_id,
+						products[i].product_name,
+						products[i].department_name,
+						products[i].price,
+						products[i].stock_quantity
+					]);
+				}
+				// displays talbe and returns to main menu
+				console.log(table.toString());
+				return managerMenu.main();
+			}).catch(function(errMsg){
+				console.log(errMsg);
+			}); // end of bamazonDB.query() promise			
+		}, // end of productMng.viewProductsForSale()
 		viewLowInventory: function() {
 			console.log('\n ======= LOW INVENTORY PRODUCTS =======\n');
 			return managerMenu.main();
-		},
+		}, // end of productMng.viewLowInventory()
 		addToInventory: function() {
 			console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
 			return managerMenu.main();
-		},
+		}, // end of productMng.addToInventory()
 		addNewProduct: function() {
 			console.log('\n ======= ADD NEW PRODUCT =======\n');
 			return managerMenu.main();
-		}
+		} // end of productMng.addNewProduct()
 	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
 	quit: function() {
