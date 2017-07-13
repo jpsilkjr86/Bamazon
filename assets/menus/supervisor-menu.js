@@ -131,26 +131,21 @@ const supervisorMenu = {
 						console.log(answersTwo.confirm);
 						console.log('\n\nReturning to the main menu...\n');
 						return supervisorMenu.main();
-					}/*
-					// sends answersOne to bamazonDB.products.addNew()
-					bamazonDB.products.addNew(
-						answersOne.product_name,
+					}
+					// sends answersOne to bamazonDB.departments.addNew()
+					bamazonDB.departments.addNew(
 						answersOne.department_name,
-						answersOne.price,
-						answersOne.stock_quantity
+						answersOne.over_head_costs
 					).then(function(results){
-						console.log('\n\nProduct successfully added!\n'
+						console.log('\n\Department successfully created!\n'
 							+ 'Returning to the main menu...\n');
-						return managerMenu.main();
+						return supervisorMenu.main();
 
 					}).catch(function(errMsg){
 						console.log("\nWe're sorry, but we were unable to process your request.\n"
 							+ 'Reason: ' + errMsg + '\n');
-						return managerMenu.main();
-							
-					});	// end of bamazonDB.products.addNew() promise */
-					console.log(answersTwo.confirm);
-					return supervisorMenu.main();
+						return supervisorMenu.main();							
+					});	// end of bamazonDB.departments.addNew() promise 
 				}); // end of second prompt() promise
 			}); // end of first prompt() promise
 		} // end of departmentMng.createNewDept()

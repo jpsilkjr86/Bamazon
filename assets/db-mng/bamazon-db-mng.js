@@ -116,9 +116,32 @@ let bamazonDB = {
 					}
 					return resolve('inserted ' + res.affectedRows + ' row(s)!');
 				});
-			}); // end of Promse
-		}
-	}, // end of bamazonDB.products subset object		
+			}); // end of Promise
+		} // end of products.addNew()
+	}, // end of bamazonDB.products subset object	
+	departments: {
+		viewProductSales: function() {
+
+		}, // end of departments.viewProductSales()
+		addNew: function(department_name, over_head_costs) {
+			// returns promise
+			return new Promise(function(resolve, reject) {
+				let queryString = 'INSERT INTO departments (department_name,'
+					+ ' over_head_costs) VALUES (?)';
+				let queryValAry = [[department_name, over_head_costs]];
+				// matches arguments with query string
+				connection.query(queryString, queryValAry, function(err, res){
+					if (err) {
+						return reject('Server processing error.');
+					}
+					if (res.affectedRows === 0) {
+						return reject('Server processing error.')
+					}
+					return resolve('inserted ' + res.affectedRows + ' row(s)!');
+				});
+			}); // end of Promise
+		} // end of departments.addNew()
+	}, // end of bamazonDB.departments subset object
 	quit: function() {
 		return new Promise(function(resolve, reject) {
 			// attempts connection to mysql server. 
