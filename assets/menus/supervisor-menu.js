@@ -28,7 +28,7 @@ const supervisorMenu = {
 	// main menu function
 	main: function() {
 
-		console.log('\n======= MAIN MENU =======\n');
+		console.log('\n ======= MAIN MENU =======\n');
 
 		prompt([
 		{
@@ -44,10 +44,10 @@ const supervisorMenu = {
 		]).then(function(answers){
 			switch (answers.mainMenuChoice) {
 				case 'View Product Sales by Department':
-					supervisorMenu.main();
+					supervisorMenu.departmentMng.viewProductSales();
 					break;
 				case 'Create New Department':
-					supervisorMenu.main();
+					supervisorMenu.departmentMng.createNewDept();
 					break;
 				case 'Quit':
 					supervisorMenu.quit();
@@ -56,6 +56,17 @@ const supervisorMenu = {
 			return;
 		});
 	}, // end of supervisorMenu.main()
+	// supervisorMenu.departmentMng subset object
+	departmentMng: {
+		viewProductSales: function () {
+			console.log('\n ======= PRODUCT SALES BY DEPARTMENT =======\n');
+			return supervisorMenu.main();
+		}, // end of departmentMng.viewProductSales()
+		createNewDept: function () {
+			console.log('\n ======= CREATE NEW DEPARTMENT =======\n');
+			return supervisorMenu.main();
+		} // end of departmentMng.createNewDept()
+	}, // end of .departmentMng subset object
 	quit: function() {
 		// handles promise returned from bamazonDB.quit()
 		bamazonDB.quit().then(function(){
