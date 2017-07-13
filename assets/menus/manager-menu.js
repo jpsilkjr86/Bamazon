@@ -74,7 +74,7 @@ const managerMenu = {
 				console.log('\n ======= PRODUCTS FOR SALE =======\n');				
 				// instantiates table from cli-table node module
 				let table = new Table({
-					head: ['Item ID', 'Product Name', 'Department', 'Price', 'Stock Qty'],
+					head: ['Item ID', 'Product Name', 'Department', 'Price', 'Stock Qty', 'Sales'],
 					chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
 			         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
 			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
@@ -87,7 +87,8 @@ const managerMenu = {
 						products[i].product_name,
 						products[i].department_name,
 						'$' + products[i].price,
-						products[i].stock_quantity
+						products[i].stock_quantity,
+						'$' + products[i].product_sales
 					]);
 				}
 				// displays talbe and returns to main menu
@@ -106,7 +107,7 @@ const managerMenu = {
 				console.log('\n ======= LOW INVENTORY PRODUCTS =======\n');
 				// instantiates table from cli-table node module
 				let table = new Table({
-					head: ['Item ID', 'Product Name', 'Department', 'Price', 'Stock Qty'],
+					head: ['Item ID', 'Product Name', 'Department', 'Price', 'Stock Qty', 'Sales'],
 					chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
 			         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
 			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
@@ -119,7 +120,8 @@ const managerMenu = {
 						products[i].product_name,
 						products[i].department_name,
 						'$' + products[i].price,
-						products[i].stock_quantity
+						products[i].stock_quantity,
+						'$' + products[i].product_sales
 					]);
 				}
 				// displays talbe and returns to main menu
