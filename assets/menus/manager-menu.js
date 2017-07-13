@@ -29,7 +29,7 @@ const managerMenu = {
 	// main menu function
 	main: function() {
 
-		console.log('\n======= MAIN MENU =======\n');
+		console.log('\n ======= MAIN MENU =======\n');
 
 		prompt([
 		{

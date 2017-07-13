@@ -140,6 +140,11 @@ let bamazonDB = {
 					if (res.length === 0) {
 						return reject("No results for query");
 					}
+					// creating the above view first allows for next-level calculations using
+					// the values in the alias column total_product_sales created and saved in the
+					// view. The query below calculates total_profit by subtracting
+					// over_head_costs from total_product_sales column, the latter values of which
+					// are only accessible in the department_revenue view.
 					let salesTableQuery = 'SELECT d.department_name, d.over_head_costs,'
 						+ ' t.total_product_sales,'
 						+ ' (t.total_product_sales - d.over_head_costs) AS total_profit'

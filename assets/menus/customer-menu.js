@@ -30,7 +30,7 @@ const customerMenu = {
 	// main menu function
 	main: function() {
 
-		console.log('\n======= MAIN MENU =======\n');
+		console.log('\n ======= MAIN MENU =======\n');
 
 		prompt([
 		{
@@ -58,7 +58,7 @@ const customerMenu = {
 		// customerMenu.purchase.main() is the menu for making a purchase
 		main: function() {
 
-			console.log('\n======= PURCHASE MENU =======\n'
+			console.log('\n ======= PURCHASE MENU =======\n'
 				+ '\nPlease select from the following options:\n');
 
 			prompt([
@@ -195,7 +195,7 @@ const customerMenu = {
 
 		// menu for browsing by department
 		browseByDept: function() {
-			console.log('\n======= BROWSE BY DEPARTMENT =======\n' 
+			console.log('\n ======= BROWSE BY DEPARTMENT =======\n' 
 				+ '\n"Browse by Department" feature still under construction.'
 				+ '\nReturning to the main menu...\n');
 			return customerMenu.main();
