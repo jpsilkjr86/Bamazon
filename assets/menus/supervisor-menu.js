@@ -64,9 +64,97 @@ const supervisorMenu = {
 		}, // end of departmentMng.viewProductSales()
 		createNewDept: function () {
 			console.log('\n ======= CREATE NEW DEPARTMENT =======\n');
-			return supervisorMenu.main();
+			console.log("\nPlease enter information about the department you'd like to create.\n");
+			// Prompt 1: ask user to enter the department name
+			prompt([
+			{
+				type: 'input',
+				message: 'Department Name (Required):',
+				name: 'department_name',
+				filter: function(str) {
+					return str.trim();
+				},
+				validate: function(str) {
+					if (str == null || str == '') {
+						console.log('\n\nRequired Input - empty string not permitted.\n');
+						return false;
+					}
+					return true;
+				}
+			},{
+			// Prompt 2: ask overhead costs
+				type: 'input',
+				message: 'Overhead Costs: $',
+				name: 'over_head_costs',
+				filter: function(str) {
+					if (str === '') {
+						return null;
+					}
+					return parseInt(str.trim());
+				},
+				validate: function(value) {
+					if (value === null) {
+						return true;
+					}
+					if (isNaN(value)) {
+						console.log('\n\nOverhead cost must be a valid number.\n'
+							+ 'If it is yet to be determined, just leave the field blank.\n');
+						return false;
+					}
+					if (value === 0) {
+						console.log('\n\nOverhead cost may not be equal to zero.\n'
+							+ 'If it is yet to be determined, just leave the field blank.\n');
+						return false;
+					}
+					if (value < 0) {
+						console.log('\n\nOverhead cost may not be less than zero.\n'
+							+ 'If it is yet to be determined, just leave the field blank.\n');
+						return false;
+					}
+					return true;
+				}
+			}
+			// promise resolve handler for prompt()
+			]).then(function(answersOne){
+				console.log('\nReview new department information:\n'
+					+ '\nDepartment Name: ' + answersOne.department_name
+					+ '\nOverhead Costs: $' + answersOne.over_head_costs + '\n');
+				// prompt to confirm details
+				prompt([{
+					type: 'confirm',
+					message: 'Is the above information correct?',
+					name: 'confirm',
+					default: false
+				}]).then(function(answersTwo){
+					// if no, return to main main
+					if (answersTwo.confirm === false) {
+						console.log(answersTwo.confirm);
+						console.log('\n\nReturning to the main menu...\n');
+						return supervisorMenu.main();
+					}/*
+					// sends answersOne to bamazonDB.products.addNew()
+					bamazonDB.products.addNew(
+						answersOne.product_name,
+						answersOne.department_name,
+						answersOne.price,
+						answersOne.stock_quantity
+					).then(function(results){
+						console.log('\n\nProduct successfully added!\n'
+							+ 'Returning to the main menu...\n');
+						return managerMenu.main();
+
+					}).catch(function(errMsg){
+						console.log("\nWe're sorry, but we were unable to process your request.\n"
+							+ 'Reason: ' + errMsg + '\n');
+						return managerMenu.main();
+							
+					});	// end of bamazonDB.products.addNew() promise */
+					console.log(answersTwo.confirm);
+					return supervisorMenu.main();
+				}); // end of second prompt() promise
+			}); // end of first prompt() promise
 		} // end of departmentMng.createNewDept()
-	}, // end of .departmentMng subset object
+	}, // end of departmentMng subset object
 	quit: function() {
 		// handles promise returned from bamazonDB.quit()
 		bamazonDB.quit().then(function(){
