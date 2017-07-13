@@ -60,7 +60,32 @@ const supervisorMenu = {
 	departmentMng: {
 		viewProductSales: function () {
 			console.log('\n ======= PRODUCT SALES BY DEPARTMENT =======\n');
-			return supervisorMenu.main();
+
+			bamazonDB.departments.viewProductSales().then(function(results){
+				// instantiates table from cli-table node module
+				let table = new Table({
+					head: ['Department', 'Overhead Costs', 'Total Product Sales', 'Total Profit'],
+					chars: { 'top': '═' , 'top-mid': '╤' , 'top-left': '╔' , 'top-right': '╗'
+			         , 'bottom': '═' , 'bottom-mid': '╧' , 'bottom-left': '╚' , 'bottom-right': '╝'
+			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
+			         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
+				});
+				// loops through results and pushes onto cli-table
+				for (let i = 0; i < results.length; i++) {
+					table.push([
+						results[i].department_name,
+						'$' + results[i].over_head_costs,
+						'$' + results[i].total_product_sales,
+						results[i].total_profit
+					]);
+				}
+				// displays talbe and returns to main menu
+				console.log(table.toString());
+				return supervisorMenu.main();
+			}).catch(function(errMsg){
+				console.log(errMsg);
+				return supervisorMenu.main();
+			});
 		}, // end of departmentMng.viewProductSales()
 		createNewDept: function () {
 			console.log('\n ======= CREATE NEW DEPARTMENT =======\n');

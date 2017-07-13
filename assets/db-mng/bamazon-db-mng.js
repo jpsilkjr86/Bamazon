@@ -121,7 +121,46 @@ let bamazonDB = {
 	}, // end of bamazonDB.products subset object	
 	departments: {
 		viewProductSales: function() {
+			return new Promise(function(resolve, reject)  {
+				// first declares a query string which accomplishes the following:
+				// creates (or replaces if exists) a new view (virtual table) called
+				// department_revenue, which is composed of columns department_name and a
+				// column called total_product_sales which is the sum of product_sales
+				// grouped by department name (all coming from the table 'products').
+				let createViewQuery = 'CREATE OR REPLACE VIEW department_revenue AS'
+					+ ' SELECT department_name, SUM(product_sales) AS total_product_sales'
+					+ ' FROM products GROUP BY department_name';
 
+				connection.query(createViewQuery, function(err, res) {
+					// if connection error
+					if (err) {
+						return reject('Server connection error');
+					}
+					// if item_id yields no results
+					if (res.length === 0) {
+						return reject("No results for query");
+					}
+					let salesTableQuery = 'SELECT d.department_name, d.over_head_costs,'
+						+ ' t.total_product_sales,'
+						+ ' (t.total_product_sales - d.over_head_costs) AS total_profit'
+						+ ' FROM departments AS d'
+						+ ' LEFT JOIN department_revenue AS t'
+						+ ' ON d.department_name=t.department_name'
+						+ ' ORDER BY department_name';
+
+					connection.query(salesTableQuery, function(err, res) {
+						// if connection error
+						if (err) {
+							return reject('Server connection error');
+						}
+						// if item_id yields no results
+						if (res.length === 0) {
+							return reject("No results for query");
+						}
+						return resolve(res);
+					});
+				});
+			});
 		}, // end of departments.viewProductSales()
 		addNew: function(department_name, over_head_costs) {
 			// returns promise
