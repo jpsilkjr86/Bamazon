@@ -196,45 +196,47 @@ const customerMenu = {
 					departments.push(results[i].department_name);
 				}
 				// creates prompt of type list dynamically from departments array
-				prompt([{
+				// and returns the prompt as a promise.
+				return prompt([{
 					type: 'list',
 					message: 'Please select a department from the list.',
 					choices: departments,
 					name: 'department_name'
-				}]).then(function(answers){
-					// declares locally scoped query string
-					let productsQuery = 'SELECT product_name FROM products'
-						+ ' WHERE department_name = ?';
-					// returns bamazonDB.query, itself a promise.
-					return bamazonDB.query(productsQuery, [answers.department_name]);
-				}).then(function(products){
-					// declares a locally scoped productsAry array
-					let productsAry = [];
-					// loops through results and pushes each department name onto the array
-					for (let i = 0; i < products.length; i++) {
-						productsAry.push(products[i].product_name);
-					}
-					// creates prompt of type list dynamically from productsAry array
-					prompt([{
-						type: 'list',
-						message: 'Please select a product.',
-						choices: productsAry,
-						name: 'product_name'
-					}]).then(function(answersTwo){
-						console.log(answersTwo);
-						// creates prompt of type list from products array dynamically
-						return customerMenu.main();
-					}); // end of prompt promise						
-				}).catch(function(errMsg){
-					console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ '\nReason: ' + errMsg + '\n');
+				}]);
+			// promise for prompt
+			}).then(function(answers){
+				// declares locally scoped query string
+				let productsQuery = 'SELECT product_name FROM products'
+					+ ' WHERE department_name = ?';
+				// returns bamazonDB.query, itself a promise.
+				return bamazonDB.query(productsQuery, [answers.department_name]);
+			// promise for bamazonDB query about products
+			}).then(function(results){
+				// declares a locally scoped products array
+				let products = [];
+				// loops through results and pushes each department name onto the array
+				for (let i = 0; i < results.length; i++) {
+					products.push(results[i].product_name);
+				}
+				// creates prompt of type list dynamically from products array
+				// and returns the prompt as a promise.
+				 return prompt([{
+					type: 'list',
+					message: 'Please select a product.',
+					choices: products,
+					name: 'product_name'
+				}]);
+			// promise for prompt
+			}).then(function(answers){
+					console.log(answers);
+					// creates prompt of type list from products array dynamically
 					return customerMenu.main();
-				}); // end of chained promises
+			// error handler for all promises in the chain			
 			}).catch(function(errMsg){
 				console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ '\nReason: ' + errMsg + '\n');
+						+ '\nReason: ' + errMsg + '\n');
 				return customerMenu.main();
-			}); // end of bamazonDB departments query promise
+			}); // end of chained promises
 		} // end of browseByDept()
 	}, // end of customerMenu.purchase subset object
 	// function for quitting the customer menu
