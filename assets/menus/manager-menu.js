@@ -45,7 +45,6 @@ const managerMenu = {
 			name: 'mainMenuChoice'
 		}
 		]).then(function(answers){
-			console.log(answers);
 			switch (answers.mainMenuChoice) {
 				case 'View Products for Sale':
 					managerMenu.productMng.viewProductsForSale();
@@ -181,26 +180,20 @@ const managerMenu = {
 				if (answers.quantity_to_increase === 0) {
 					return managerMenu.main();
 				}
-
-				// first finds the product by id to make sure it exists before proceeding
-				bamazonDB.products.getById(answers.requested_id).then(function(product){
-					// adds stock after product is retrieved from the database
-					bamazonDB.products.addStock(
-						answers.requested_id, answers.quantity_to_increase
-					).then(function(result){
-						console.log('\n\nProduct stock successfully updated!\n'
-							+ 'Returning to the main menu...\n');
-						return managerMenu.main();
-					}).catch(function(errMsg){
-						console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ 'Reason: ' + errMsg + '\n');
-						return managerMenu.main();
-					}); // end of addStock() promise
+				// chains promises together using Promise.all. First gets the prodoct info
+				// by id to make sure it exists, and then adds it to the stock.
+				Promise.all([
+					bamazonDB.products.getById(answers.requested_id), 
+					bamazonDB.products.addStock(answers.requested_id, answers.quantity_to_increase)
+				]).then(function(result){
+					console.log('\n\nProduct stock successfully updated!\n'
+						+ 'Returning to the main menu...\n');
+					return managerMenu.main();
 				}).catch(function(errMsg){
 					console.log("\nWe're sorry, but we were unable to process your request.\n"
 						+ 'Reason: ' + errMsg + '\n');
 					return managerMenu.main();
-				}); // end of getById() promise
+				}); // end of Promise.all()
 			}); // end of prompt() promise
 		}, // end of productMng.addToInventory()
 		addNewProduct: function() {
