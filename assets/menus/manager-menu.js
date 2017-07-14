@@ -68,7 +68,7 @@ const managerMenu = {
 	// managerMenu.productMng subset object
 	productMng: {
 		viewProductsForSale: function() {
-			// gets table of data from bamazonDB.query promise
+			// gets table of products data from bamazonDB.query promise resolve handler
 			bamazonDB.query('SELECT * FROM ??', ['products']).then(function(products){
 				console.log('\n ======= PRODUCTS FOR SALE =======\n');				
 				// instantiates table from cli-table node module
@@ -93,12 +93,17 @@ const managerMenu = {
 				// displays talbe and returns to main menu
 				console.log(table.toString());
 				return managerMenu.main();
+				// end of promise resolve
+			// error handler for bamazonDB.query() promise
 			}).catch(function(errMsg){
-				console.log(errMsg);
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+						+ 'Reason: ' + errMsg + '\n');
+				return managerMenu.main();
 			}); // end of bamazonDB.query() promise
 		}, // end of productMng.viewProductsForSale()
+		// function for displaying low inventory items (of qty < 5)
 		viewLowInventory: function() {
-			// gets table of data from bamazonDB.query promise
+			// gets table of products data from bamazonDB.query promise resolve handler 
 			bamazonDB.query(
 				'SELECT * FROM ?? WHERE ?? < ?',
 				['products', 'stock_quantity', 5]
@@ -126,17 +131,19 @@ const managerMenu = {
 				// displays talbe and returns to main menu
 				console.log(table.toString());
 				return managerMenu.main();
+			// error handler for bamazonDB.query() promise
 			}).catch(function(errMsg){
-				console.log(errMsg);
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+						+ 'Reason: ' + errMsg + '\n');
+				return managerMenu.main();
 			}); // end of bamazonDB.query() promise
 		}, // end of productMng.viewLowInventory()
 		addToInventory: function() {
 			console.log('\n ======= ADD TO EXISTING INVENTORY =======\n');
 			console.log("\nWhich item's stock would you like to add inventory to today?\n");
-			// Prompt 1: ask user to enter the item_id of the product they would
-			// like to add inventory to
+			
 			prompt([
-			{
+			{ // Q1: ask user to enter the item_id of product they'd like to add inventory to
 				type: 'input',
 				message: 'Item ID:',
 				name: 'requested_id',
@@ -154,8 +161,7 @@ const managerMenu = {
 				filter: function(str) {
 					return parseInt(str.trim());
 				}
-			},{ 
-			// Prompt 2: ask the quantity of stock to add
+			},{ // Q2: ask the quantity of stock to add
 				type: 'input',
 				message: 'Quantity to Increase:',
 				name: 'quantity_to_increase',
@@ -194,14 +200,13 @@ const managerMenu = {
 						+ 'Reason: ' + errMsg + '\n');
 					return managerMenu.main();
 				}); // end of Promise.all()
-			}); // end of prompt() promise
+			}); // end of prompt()
 		}, // end of productMng.addToInventory()
 		addNewProduct: function() {
 			console.log('\n ======= ADD NEW PRODUCT =======\n');
 			console.log("\nPlease enter information about the product you'd like to add.\n");
-			// Prompt 1: ask user to enter the product name
 			prompt([
-			{
+			{ // Q1: ask user to enter the product name
 				type: 'input',
 				message: 'Product Name (Required):',
 				name: 'product_name',
@@ -215,8 +220,7 @@ const managerMenu = {
 					}
 					return true;
 				}
-			},{ 
-			// Prompt 2: ask name of department the product should be placed in
+			},{ // Q2: ask name of department the product should be placed in
 				type: 'input',
 				message: 'Department:',
 				name: 'department_name',
@@ -226,8 +230,7 @@ const managerMenu = {
 					}
 					return str.trim();
 				}
-			},{
-			// Prompt 3: ask price of product
+			},{ // Q3: ask price of product
 				type: 'input',
 				message: 'Price: $',
 				name: 'price',
@@ -258,8 +261,7 @@ const managerMenu = {
 					}
 					return true;
 				}
-			},{
-			// Prompt 4: ask starting stock quantity
+			},{ // Q4: ask starting stock quantity
 				type: 'input',
 				message: 'Starting Stock Quantity:',
 				name: 'stock_quantity',
@@ -285,8 +287,7 @@ const managerMenu = {
 					}
 					return true;
 				}
-			}
-			// promise resolve handler for prompt()
+			} // promise for prompt()
 			]).then(function(answersOne){
 				console.log('\nReview new product information:\n'
 					+ '\nProduct: ' + answersOne.product_name
@@ -315,15 +316,14 @@ const managerMenu = {
 						console.log('\n\nProduct successfully added!\n'
 							+ 'Returning to the main menu...\n');
 						return managerMenu.main();
-
+					// error handler for bamazonDB.products.addNew() promise
 					}).catch(function(errMsg){
 						console.log("\nWe're sorry, but we were unable to process your request.\n"
 							+ 'Reason: ' + errMsg + '\n');
 						return managerMenu.main();
-
 					});	// end of bamazonDB.products.addNew() promise
-				}); // end of second prompt() promise
-			}); // end of first prompt() promise
+				}); // end of second prompt() promise (confirm)
+			}); // end of first prompt() promise (input)
 		} // end of productMng.addNewProduct()
 	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
@@ -334,8 +334,7 @@ const managerMenu = {
 		}).catch(function(errMsg){
 			return console.log(errMsg);
 		});
-	} // end of managerMenu.quit()
-	
+	} // end of managerMenu.quit()	
 }; // end of managerMenu object
 
 module.exports = managerMenu;
