@@ -202,12 +202,34 @@ const customerMenu = {
 					choices: departments,
 					name: 'department_name'
 				}]).then(function(answers){
-
-					console.log(answers.department_name);
+					// declares locally scoped query string
+					let productsQuery = 'SELECT product_name FROM products'
+						+ ' WHERE department_name = ?';
+					// returns bamazonDB.query, itself a promise.
+					return bamazonDB.query(productsQuery, [answers.department_name]);
+				}).then(function(products){
+					// declares a locally scoped productsAry array
+					let productsAry = [];
+					// loops through results and pushes each department name onto the array
+					for (let i = 0; i < products.length; i++) {
+						productsAry.push(products[i].product_name);
+					}
+					// creates prompt of type list dynamically from productsAry array
+					prompt([{
+						type: 'list',
+						message: 'Please select a product.',
+						choices: productsAry,
+						name: 'product_name'
+					}]).then(function(answersTwo){
+						console.log(answersTwo);
+						// creates prompt of type list from products array dynamically
+						return customerMenu.main();
+					}); // end of prompt promise						
+				}).catch(function(errMsg){
+					console.log("\nWe're sorry, but we were unable to process your request.\n"
+							+ '\nReason: ' + errMsg + '\n');
 					return customerMenu.main();
-
-				}); // end of prompt promise
-
+				}); // end of chained promises
 			}).catch(function(errMsg){
 				console.log("\nWe're sorry, but we were unable to process your request.\n"
 							+ '\nReason: ' + errMsg + '\n');

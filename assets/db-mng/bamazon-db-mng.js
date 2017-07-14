@@ -14,9 +14,9 @@ const connection = mysql.createConnection({
 // database management Object to be exported
 let bamazonDB = {
 	// asyncrhounous method returning Promise with success/fail messages
-	connect: function() {		
+	connect: function() {
 		return new Promise(function(resolve, reject) {
-			// attempts connection to mysql server. 
+			// attempts connection to mysql server.
 			connection.connect(function(err) {
 				if (err) {
 					return reject('Error connecting to Bamazon: ' + err.stack);
@@ -24,7 +24,7 @@ let bamazonDB = {
 				// returns resolve if connection is successful
 				return resolve('connected as id ' + connection.threadId);
 			});
-		});			
+		});
 	}, // end of bamazonDB.connect
 	// simple SQL query method, receives a SQL queryStr & queryValAry as arguments, returns promise
 	query: function(queryStr, queryValAry) {
@@ -33,6 +33,9 @@ let bamazonDB = {
 			connection.query(queryStr, queryValAry, function(err, res) {
 				if (err) {
 					return reject('Server connection error');
+				}
+				if (!res.length || res[0] == null) {
+					return reject('Query did not yield any results')
 				}
 				return resolve(res);
 			});
