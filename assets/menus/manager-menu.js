@@ -182,26 +182,31 @@ const managerMenu = {
 			}
 			// promise resolve handler for prompt()
 			]).then(function(answers){
-				// if quantity_to_increase is zero, return to main menu
+				// if quantity_to_increase is zero, throws error so that promise chain jumps
+				// directly to the catch handler
 				if (answers.quantity_to_increase === 0) {
-					return managerMenu.main();
+					throw 'Requested stock quantity equals zero';
 				}
 				// chains promises together using Promise.all. First gets the prodoct info
 				// by id to make sure it exists, and then adds it to the stock.
-				Promise.all([
+				// Promise.all is returned so as to continue the promise chain.
+				return Promise.all([
 					bamazonDB.products.getById(answers.requested_id), 
 					bamazonDB.products.addStock(answers.requested_id, answers.quantity_to_increase)
-				]).then(function(result){
-					console.log('\n\nProduct stock successfully updated!\n'
-						+ 'Returning to the main menu...\n');
-					return managerMenu.main();
-				}).catch(function(errMsg){
-					console.log("\nWe're sorry, but we were unable to process your request.\n"
-						+ 'Reason: ' + errMsg + '\n');
-					return managerMenu.main();
-				}); // end of Promise.all()
-			}); // end of prompt()
+				]);
+			// promise for Promise.all() chain above
+			}).then(function(result){
+				console.log('\n\nProduct stock successfully updated!\n'
+					+ 'Returning to the main menu...\n');
+				return managerMenu.main();
+			// error handler for all promises in the chain
+			}).catch(function(errMsg){
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+					+ 'Reason: ' + errMsg + '\n');
+				return managerMenu.main();
+			}); // end of promise chain
 		}, // end of productMng.addToInventory()
+		// method for adding new products to the inventory
 		addNewProduct: function() {
 			console.log('\n ======= ADD NEW PRODUCT =======\n');
 			console.log("\nPlease enter information about the product you'd like to add.\n");
@@ -294,36 +299,41 @@ const managerMenu = {
 					+ '\nDepartment: ' + answersOne.department_name
 					+ '\nPrice: $' + answersOne.price
 					+ '\nStarting Stock Quantity: ' + answersOne.stock_quantity + '\n');
-				// prompt to confirm details
+				// prompt to confirm details. this prompt cannot be returned and linked 
+				// with previous prompt promise because answersOne values must be
+				// carried over to the next functions.
 				prompt([{
 					type: 'confirm',
 					message: 'Is the above information correct?',
 					name: 'confirm',
 					default: false
+				// promise for confirm prompt
 				}]).then(function(answersTwo){
-					// if no, return to main main
+					// if no, throws an error so that it jumps directly to the catch
+					// handler of the promise chain
 					if (answersTwo.confirm === false) {
-						console.log('\n\nReturning to the main menu...\n');
-						return managerMenu.main();
+						throw 'User canceled order';
 					}
 					// sends answersOne to bamazonDB.products.addNew()
-					bamazonDB.products.addNew(
+					// this function, a promise, is returned to continue promise chain
+					return bamazonDB.products.addNew(
 						answersOne.product_name,
 						answersOne.department_name,
 						answersOne.price,
 						answersOne.stock_quantity
-					).then(function(results){
-						console.log('\n\nProduct successfully added!\n'
-							+ 'Returning to the main menu...\n');
-						return managerMenu.main();
-					// error handler for bamazonDB.products.addNew() promise
-					}).catch(function(errMsg){
-						console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ 'Reason: ' + errMsg + '\n');
-						return managerMenu.main();
-					});	// end of bamazonDB.products.addNew() promise
-				}); // end of second prompt() promise (confirm)
-			}); // end of first prompt() promise (input)
+					);
+				// promise for bamazonDB.products.addNew()
+				}).then(function(results){
+					console.log('\n\nProduct successfully added!\n'
+						+ 'Returning to the main menu...\n');
+					return managerMenu.main();
+				// error handler for promise chain
+				}).catch(function(errMsg){
+					console.log("\nWe're sorry, but we were unable to process your request.\n"
+						+ 'Reason: ' + errMsg + '\n');
+					return managerMenu.main();
+				}); // end of promise chain
+			}); // end of first prompt() promise (input product info)
 		} // end of productMng.addNewProduct()
 	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
