@@ -137,8 +137,8 @@ const customerMenu = {
 							console.log('\nPlease enter a valid number.\n');
 							return false;
 						}
-						if (parseInt(str) < 1) {
-							console.log('\n\nInputs must be greater than zero.\n');
+						if (parseInt(str) < 0) {
+							console.log('\n\nInput may not be less than zero.\n');
 							return false;
 						}
 						return true;
@@ -149,6 +149,11 @@ const customerMenu = {
 				}]); // end of returned prompt parameters
 			// promise for prompt
 			}).then(function(answers){
+				// if requested quantity is zero, throws an error so that the
+				// promise chain jumps directly to catch handler.
+				if (answers.requested_quantity === 0) {
+					throw 'Requested quantiy is zero.';
+				}
 				// starts a newOrder object using the answers from the previous prompt
 				const newOrder = 
 					new BamazonOrder(answers.requested_id, answers.requested_quantity);
@@ -171,7 +176,7 @@ const customerMenu = {
 			}).catch(function(errMsg){
 				// if the checkout was unsuccessful, display reason, return to main menu
 				console.log("\nWe're sorry, but we were unable to process your purchase.\n"
-					+ '\nReason for failure: ' + errMsg + '\n');
+					+ '\nReason: ' + errMsg + '\n');
 				return customerMenu.main();
 			});  // end of all chained promises
 		}, // end of customerMenu.purchase.listAllAndBuy()
