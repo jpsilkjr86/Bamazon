@@ -26,12 +26,9 @@ const customerMenu = {
 			return console.log(errMsg);
 		});
 	}, // end of customerMenu.intitialize()
-
 	// main menu function
 	main: function() {
-
 		console.log('\n ======= MAIN MENU =======\n');
-
 		prompt([
 		{
 			type: 'list',
@@ -40,27 +37,22 @@ const customerMenu = {
 			name: 'mainMenuChoice'
 		}
 		]).then(function(answers){
-
 			if (answers.mainMenuChoice === 'I would like to purchase an item.') {
 				// proceeds to purchase menu
 				return customerMenu.purchase.main();
 			}
-
 			if (answers.mainMenuChoice === 'Quit') {
 				// proceeds to quit
 				return customerMenu.quit();
 			}				
 		});
 	}, // end of customerMenu.main()
-
 	// purchase subset object
 	purchase: {		
 		// customerMenu.purchase.main() is the menu for making a purchase
 		main: function() {
-
 			console.log('\n ======= PURCHASE MENU =======\n'
 				+ '\nPlease select from the following options:\n');
-
 			prompt([
 			{
 				type: 'list',
@@ -86,7 +78,6 @@ const customerMenu = {
 				return;
 			});
 		}, // end of customerMenu.purchase.main()
-
 		// prompt for listing all items on Bamazon and purchasing by id
 		listAllAndBuy: function() {
 			// sends SQL query string and values array to bamazonDB.query()
@@ -96,7 +87,6 @@ const customerMenu = {
 				[['item_id', 'product_name', 'price']]
 			// receives products from promise resolve 
 			).then(function(products){
-
 				console.log('\n ======= BROWSE ALL ITEMS ======= \n');
 
 				let table = new Table({
@@ -107,7 +97,6 @@ const customerMenu = {
 			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
 			         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
 				});
-
 				// loops through products and pushes info onto cli-table
 				for (let i = 0; i < products.length; i++) {
 					table.push([
@@ -161,11 +150,9 @@ const customerMenu = {
 				}
 				// promise resolve handler for prompt
 				]).then(function(answers){
-
 					// starts a newOrder object
 					const newOrder = 
 						new BamazonOrder(answers.requested_id, answers.requested_quantity);
-
 					// checkout function returns a promise.
 					newOrder.checkout().then(function(orderDetails){
 						// if the checkout is successful, then do this
@@ -177,31 +164,57 @@ const customerMenu = {
 							+ '\nUnit Price: ' + orderDetails.price
 							+ '\nQuantity: ' + orderDetails.requested_quantity
 							+ '\nPurchase Total: ' + orderDetails.total_cost);
-
 						return customerMenu.main();
-
+					// error handler for newOrder.checkout()
 					}).catch(function(failureMessage){
 						// if the checkout was unsuccessful, display reason, return to main menu
 						console.log("\nWe're sorry, but we were unable to process your purchase.\n"
 							+ '\nReason for failure: ' + failureMessage + '\n');
-
 						return customerMenu.main();
 					});  // end of newOrder.checkout() promise
 				}); // end of prompt()
+			// error handler for bamazonDB.query()
 			}).catch(function(errMsg){
-				return console.log(errMsg);
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+							+ '\nReason: ' + errMsg + '\n');
+				return customerMenu.main();
 			}); // end of query promise handlers
 		}, // end of customerMenu.purchase.listAllAndBuy()
-
 		// menu for browsing by department
 		browseByDept: function() {
-			console.log('\n ======= BROWSE BY DEPARTMENT =======\n' 
-				+ '\n"Browse by Department" feature still under construction.'
-				+ '\nReturning to the main menu...\n');
-			return customerMenu.main();
-		}
-	}, // end of customerMenu.purchase subset object
+			console.log('\n ======= BROWSE BY DEPARTMENT =======\n');
 
+			// gets list of all departments from database for use in prompt
+			bamazonDB.query(
+				'SELECT DISTINCT ?? FROM ?? WHERE stock_quantity > 0',
+				['department_name', 'products']
+			).then(function(results){
+				// declares a locally scoped departments array
+				let departments = [];
+				// loops through results and pushes each department name onto the array
+				for (let i = 0; i < results.length; i++) {
+					departments.push(results[i].department_name);
+				}
+				// creates prompt of type list dynamically from departments array
+				prompt([{
+					type: 'list',
+					message: 'Please select a department from the list.',
+					choices: departments,
+					name: 'department_name'
+				}]).then(function(answers){
+
+					console.log(answers.department_name);
+					return customerMenu.main();
+
+				}); // end of prompt promise
+
+			}).catch(function(errMsg){
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+							+ '\nReason: ' + errMsg + '\n');
+				return customerMenu.main();
+			}); // end of bamazonDB departments query promise
+		} // end of browseByDept()
+	}, // end of customerMenu.purchase subset object
 	// function for quitting the customer menu
 	quit: function() {
 		// handles promise returned from bamazonDB.quit()
@@ -210,8 +223,7 @@ const customerMenu = {
 		}).catch(function(errMsg){
 			return console.log(errMsg);
 		});
-	} // end of customerMenu.quit()
-	
+	} // end of customerMenu.quit()	
 }; // end of customerMenu object
 
 module.exports = customerMenu;
