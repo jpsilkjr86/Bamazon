@@ -85,7 +85,7 @@ const customerMenu = {
 			bamazonDB.query(
 				'SELECT ?? FROM products',
 				[['item_id', 'product_name', 'price']]
-			// receives products from promise resolve 
+			// promise for bamazon.query()
 			).then(function(products){
 				console.log('\n ======= BROWSE ALL ITEMS ======= \n');
 
@@ -108,9 +108,9 @@ const customerMenu = {
 
 				console.log('\nWhat would you like to purchase today?\n');
 
-				// Prompt 1: ask user to enter the item_id of the product they would like to purchase
-				prompt([
-				{
+				// returns prompt as a promise in order to continue single promise chain
+				return prompt([
+				{ // Q1: ask user to enter the item_id of the product they would like to purchase
 					type: 'input',
 					message: 'Item ID:',
 					name: 'requested_id',
@@ -128,8 +128,7 @@ const customerMenu = {
 					filter: function(str) {
 						return parseInt(str.trim());
 					}
-				},{ 
-				// Prompt 2: ask how many items they'd like to purchase
+				},{ // Q2: ask how many items they'd like to purchase
 					type: 'input',
 					message: 'Quantity:',
 					name: 'requested_quantity',
@@ -147,43 +146,38 @@ const customerMenu = {
 					filter: function(str) {
 						return parseInt(str.trim());
 					}
-				}
-				// promise resolve handler for prompt
-				]).then(function(answers){
-					// starts a newOrder object
-					const newOrder = 
-						new BamazonOrder(answers.requested_id, answers.requested_quantity);
-					// checkout function returns a promise.
-					newOrder.checkout().then(function(orderDetails){
-						// if the checkout is successful, then do this
-						console.log('\nYour purchase was successful!\n'
-							+ '\n ******* ORDER DETAILS: ******* \n'
-							+ '\nItem ID: ' + orderDetails.item_id
-							+ '\nProduct: ' + orderDetails.product_name
-							+ '\nDepartment: ' + orderDetails.department_name
-							+ '\nUnit Price: ' + orderDetails.price
-							+ '\nQuantity: ' + orderDetails.requested_quantity
-							+ '\nPurchase Total: ' + orderDetails.total_cost);
-						return customerMenu.main();
-					// error handler for newOrder.checkout()
-					}).catch(function(failureMessage){
-						// if the checkout was unsuccessful, display reason, return to main menu
-						console.log("\nWe're sorry, but we were unable to process your purchase.\n"
-							+ '\nReason for failure: ' + failureMessage + '\n');
-						return customerMenu.main();
-					});  // end of newOrder.checkout() promise
-				}); // end of prompt()
-			// error handler for bamazonDB.query()
-			}).catch(function(errMsg){
-				console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ '\nReason: ' + errMsg + '\n');
+				}]); // end of returned prompt parameters
+			// promise for prompt
+			}).then(function(answers){
+				// starts a newOrder object using the answers from the previous prompt
+				const newOrder = 
+					new BamazonOrder(answers.requested_id, answers.requested_quantity);
+				// return newOrder.checkout() as a promise.
+				return newOrder.checkout();
+			// promise for newOrder.checkout()
+			}).then(function(orderDetails){
+				// if all the promises in the chain are resolved, then do this
+				console.log('\nYour purchase was successful!\n'
+					+ '\n ******* ORDER DETAILS: ******* \n'
+					+ '\nItem ID: ' + orderDetails.item_id
+					+ '\nProduct: ' + orderDetails.product_name
+					+ '\nDepartment: ' + orderDetails.department_name
+					+ '\nUnit Price: ' + orderDetails.price
+					+ '\nQuantity: ' + orderDetails.requested_quantity
+					+ '\nPurchase Total: ' + orderDetails.total_cost);
+				// return to main menu at the end of the promise resolve chain
 				return customerMenu.main();
-			}); // end of query promise handlers
+			// error handler for all chained promises
+			}).catch(function(errMsg){
+				// if the checkout was unsuccessful, display reason, return to main menu
+				console.log("\nWe're sorry, but we were unable to process your purchase.\n"
+					+ '\nReason for failure: ' + errMsg + '\n');
+				return customerMenu.main();
+			});  // end of all chained promises
 		}, // end of customerMenu.purchase.listAllAndBuy()
 		// menu for browsing by department
 		browseByDept: function() {
 			console.log('\n ======= BROWSE BY DEPARTMENT =======\n');
-
 			// gets list of all departments from database for use in prompt
 			bamazonDB.query(
 				'SELECT DISTINCT ?? FROM ?? WHERE stock_quantity > 0',
