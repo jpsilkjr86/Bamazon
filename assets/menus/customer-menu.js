@@ -186,7 +186,7 @@ const customerMenu = {
 							+ '\nReason for failure: ' + failureMessage + '\n');
 
 						return customerMenu.main();
-					});  // end of newOrder.checkout() 
+					});  // end of newOrder.checkout() promise
 				}); // end of prompt()
 			}).catch(function(errMsg){
 				return console.log(errMsg);

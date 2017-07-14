@@ -34,31 +34,35 @@ BamazonOrder.prototype.checkout = function () {
 			if (product.stock_quantity < thisOrder.requested_quantity) {
 				return reject('Insufficient stock.');
 			}
-			// updates products table in database after successfully retrieving 
-			// product info and if product is available.
-			bamazonDB.products.transaction(
+			// update current order with retrieved product information
+			thisOrder.product_name = product.product_name;
+			thisOrder.price = product.price;
+			thisOrder.department_name = product.department_name;
+
+			// returns bamazonDB.products.transaction, itself a promise as well.
+			return bamazonDB.products.transaction(
 				thisOrder.item_id, thisOrder.requested_quantity
-			).then(function(){
-				// these values are updated after mysql query. default values set in paramters above.
-				thisOrder.product_name = product.product_name;
-				thisOrder.price = product.price;
-				thisOrder.department_name = product.department_name;
-				thisOrder.order_success = true;
-				thisOrder.order_status = 'Purchase successful!';
+			);
+		// updates products table in database after successfully retrieving 
+		// product info and if product is available.
+		}).then(function(){
+			// these values are updated after mysql query. default values set in paramters above.
+			thisOrder.order_success = true;
+			thisOrder.order_status = 'Purchase successful!';
 
-				// calculated by multiplying price and requested_quantity
-				thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+			// calculated by multiplying price and requested_quantity
+			thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
 
-				// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
-				return resolve(thisOrder);
-			// catch defaults to server connection error
-			}).catch(function(failureMessage){
-				return reject(failureMessage);
-			});	// end of products.transaction() promise
+			// here can add a function for adding order information to an orders table in mysql.
+			// still in development.
+
+			// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
+			return resolve(thisOrder);
+		// error handling for promise chain
 		}).catch(function(failureMessage){
 			// passes failureMessage parameter from one promise to the next
 			return reject(failureMessage);
-		}); // end of products.getById() promise
+		}); // end of promise chain
 	}); // end of returned Promise
 }; // end of checkout()
 
