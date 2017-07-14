@@ -64,22 +64,25 @@ let bamazonDB = {
 				// 'AND stock_quantity-?>=0' ensures the function will not reduce stock to 
 				// a negative number at the point of sale.
 				let queryStr = 'UPDATE products SET stock_quantity = stock_quantity - ?,'
-				 + ' product_sales = product_sales + (price * ?)'
-				 + ' WHERE item_id=? AND stock_quantity - ? >= 0'
+				 	+ ' product_sales = product_sales + (price * ?)'
+				 	+ ' WHERE item_id=? AND stock_quantity - ? >= 0';
+				// declares locally scoped query value array variable, corresponding to ? above.
+				let queryValAry = [
+					requested_quantity,
+					requested_quantity,
+					item_id,
+					requested_quantity
+				];
 				// updates database by subtracting current stock_quantity by requested_quantity
-				connection.query(
-					queryStr,
-					[requested_quantity, requested_quantity, item_id, requested_quantity],
-					function(err, result){					
-						if (err) {
-							return reject('Server connection error.');
-						}
-						if (result.changedRows === 0) {
-							return reject ('Insufficient stock.')
-						}
-						return resolve('changed ' + result.changedRows + ' rows');
-					} // end of callback
-				); // end of query
+				connection.query(queryStr, queryValAry, function(err, result){					
+					if (err) {
+						return reject('Server connection error.');
+					}
+					if (result.changedRows === 0) {
+						return reject ('Insufficient stock.')
+					}
+					return resolve('changed ' + result.changedRows + ' rows');
+				}); // end of query
 			}); // end of Promise
 		}, // end of products.transaction()
 		// function to add stock to existing products in inventory
@@ -162,7 +165,7 @@ let bamazonDB = {
 							return reject('Server connection error');
 						}
 						// if item_id yields no results
-						if (res.length === 0) {
+						if (!res.length || res[0] == null) {
 							return reject("No results for query");
 						}
 						return resolve(res);
