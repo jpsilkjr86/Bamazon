@@ -27,7 +27,6 @@ const supervisorMenu = {
 
 	// main menu function
 	main: function() {
-
 		console.log('\n ======= MAIN MENU =======\n');
 
 		prompt([
@@ -82,17 +81,18 @@ const supervisorMenu = {
 				// displays talbe and returns to main menu
 				console.log(table.toString());
 				return supervisorMenu.main();
+			// error handler for viewProductSales() promise
 			}).catch(function(errMsg){
 				console.log(errMsg);
 				return supervisorMenu.main();
-			});
+			}); // end of viewProductSales() promise
 		}, // end of departmentMng.viewProductSales()
 		createNewDept: function () {
 			console.log('\n ======= CREATE NEW DEPARTMENT =======\n');
 			console.log("\nPlease enter information about the department you'd like to create.\n");
-			// Prompt 1: ask user to enter the department name
+
 			prompt([
-			{
+			{ // Q1: ask user to enter the department name
 				type: 'input',
 				message: 'Department Name (Required):',
 				name: 'department_name',
@@ -106,8 +106,7 @@ const supervisorMenu = {
 					}
 					return true;
 				}
-			},{
-			// Prompt 2: ask overhead costs
+			},{ // Q2: ask overhead costs
 				type: 'input',
 				message: 'Overhead Costs: $',
 				name: 'over_head_costs',
@@ -138,8 +137,7 @@ const supervisorMenu = {
 					}
 					return true;
 				}
-			}
-			// promise resolve handler for prompt()
+			} // promise handler for prompt()
 			]).then(function(answersOne){
 				console.log('\nReview new department information:\n'
 					+ '\nDepartment Name: ' + answersOne.department_name
@@ -153,7 +151,6 @@ const supervisorMenu = {
 				}]).then(function(answersTwo){
 					// if no, return to main main
 					if (answersTwo.confirm === false) {
-						console.log(answersTwo.confirm);
 						console.log('\n\nReturning to the main menu...\n');
 						return supervisorMenu.main();
 					}
@@ -165,7 +162,7 @@ const supervisorMenu = {
 						console.log('\n\Department successfully created!\n'
 							+ 'Returning to the main menu...\n');
 						return supervisorMenu.main();
-
+					// error handler for addNew() promise
 					}).catch(function(errMsg){
 						console.log("\nWe're sorry, but we were unable to process your request.\n"
 							+ 'Reason: ' + errMsg + '\n');
@@ -182,8 +179,7 @@ const supervisorMenu = {
 		}).catch(function(errMsg){
 			return console.log(errMsg);
 		});
-	} // end of supervisorMenu.quit()
-	
+	} // end of supervisorMenu.quit()	
 }; // end of supervisorMenu object
 
 module.exports = supervisorMenu;
