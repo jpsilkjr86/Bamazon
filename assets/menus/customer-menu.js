@@ -205,7 +205,7 @@ const customerMenu = {
 			// promise for prompt
 			}).then(function(answers){
 				// declares locally scoped query string
-				let productsQuery = 'SELECT product_name FROM products'
+				let productsQuery = 'SELECT item_id, product_name FROM products'
 					+ ' WHERE department_name = ?';
 				// returns bamazonDB.query, itself a promise.
 				return bamazonDB.query(productsQuery, [answers.department_name]);
@@ -215,24 +215,87 @@ const customerMenu = {
 				let products = [];
 				// loops through results and pushes each department name onto the array
 				for (let i = 0; i < results.length; i++) {
-					products.push(results[i].product_name);
+					products.push(
+						'ID: ' + results[i].item_id + ': ' + results[i].product_name);
 				}
+				// push option for 'Return to Main Menu' at end of array
+				products.push('Return to Main Menu');
 				// creates prompt of type list dynamically from products array
 				// and returns the prompt as a promise.
 				 return prompt([{
 					type: 'list',
 					message: 'Please select a product.',
 					choices: products,
-					name: 'product_name'
+					name: 'product'
 				}]);
 			// promise for prompt
 			}).then(function(answers){
-					console.log(answers);
-					// creates prompt of type list from products array dynamically
-					return customerMenu.main();
+				// throws an error if user chose to return to the main menu so that program
+				// jumps immediately to catch function at bottom of the promise chain
+				if (answers.product === 'Return to Main Menu') {
+					throw 'Return to Main Menu';
+				}
+				// gets requested_id by searching the substring of answers.product from character 
+				// index [4] to the index of the first colon 
+				let indexOfColon = answers.product.search(':');
+				let requested_id = parseInt(answers.product.substr(4, indexOfColon));
+
+				let qtyPrompt = prompt([{
+					type: 'input',
+					message: 'How many items would you like? ',
+					name: 'requested_quantity',
+					validate: function(str) {
+						if (isNaN(str)) {
+							console.log('\nPlease enter a valid number.\n');
+							return false;
+						}
+						if (parseInt(str) < 0) {
+							console.log('\n\nInput may not be less than zero.\n');
+							return false;
+						}
+						return true;
+					},
+					filter: function(str) {
+						return parseInt(str.trim());
+					}
+				}]);
+				return Promise.all([requested_id, qtyPrompt]);
+			}).then(function(productRequests){
+				// parameters correspond to Promise.all parameters. the first is just a value
+				// passed along, the second is the answers object from the qtyPrompt.
+				let requested_id = productRequests[0];
+				let requested_quantity = productRequests[1].requested_quantity;
+
+				// if requested quantity is zero, throws an error so that the
+				// promise chain jumps directly to catch handler.
+				if (requested_quantity === 0) {
+					throw 'Requested quantiy is zero.';
+				}
+				// starts a newOrder object using the obtained user inputs
+				const newOrder = 
+					new BamazonOrder(requested_id, requested_quantity);
+				// returns newOrder.checkout() as a promise.
+				return newOrder.checkout();
+			// promise for newOrder.checkout()
+			}).then(function(orderDetails){
+				// if all the promises in the chain are resolved, then do this
+				console.log('\nYour purchase was successful!\n'
+					+ '\n ******* ORDER DETAILS: ******* \n'
+					+ '\nItem ID: ' + orderDetails.item_id
+					+ '\nProduct: ' + orderDetails.product_name
+					+ '\nDepartment: ' + orderDetails.department_name
+					+ '\nUnit Price: ' + orderDetails.price
+					+ '\nQuantity: ' + orderDetails.requested_quantity
+					+ '\nPurchase Total: ' + orderDetails.total_cost);
+				// return to main menu at the end of the promise resolve chain
+				return customerMenu.main();
 			// error handler for all promises in the chain			
 			}).catch(function(errMsg){
-				console.log("\nWe're sorry, but we were unable to process your request.\n"
+				if (errMsg === 'Return to Main Menu') {
+					console.log('\nReturning to Main Menu...\n');
+					return customerMenu.main();
+				}
+				console.log("\nWe're sorry, but we were unable to complete your purchase.\n"
 						+ '\nReason: ' + errMsg + '\n');
 				return customerMenu.main();
 			}); // end of chained promises
