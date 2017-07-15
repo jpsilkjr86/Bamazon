@@ -299,41 +299,47 @@ const managerMenu = {
 					+ '\nDepartment: ' + answersOne.department_name
 					+ '\nPrice: $' + answersOne.price
 					+ '\nStarting Stock Quantity: ' + answersOne.stock_quantity + '\n');
-				// prompt to confirm details. this prompt cannot be returned and linked 
-				// with previous prompt promise because answersOne values must be
-				// carried over to the next functions.
-				prompt([{
+				
+				// prompt to confirm details. this prompt is named promptTwo and sent as an argument
+				// to Promise.all() above along with answersOne from first prompt. This allows
+				// promise .then() functions to be chained and handle all errors in one final 
+				// .catch() at the end.
+				let promptTwo = prompt([{
 					type: 'confirm',
 					message: 'Is the above information correct?',
 					name: 'confirm',
 					default: false
 				// promise for confirm prompt
-				}]).then(function(answersTwo){
-					// if no, throws an error so that it jumps directly to the catch
-					// handler of the promise chain
-					if (answersTwo.confirm === false) {
-						throw 'User canceled order';
-					}
-					// sends answersOne to bamazonDB.products.addNew()
-					// this function, a promise, is returned to continue promise chain
-					return bamazonDB.products.addNew(
-						answersOne.product_name,
-						answersOne.department_name,
-						answersOne.price,
-						answersOne.stock_quantity
-					);
-				// promise for bamazonDB.products.addNew()
-				}).then(function(results){
-					console.log('\n\nProduct successfully added!\n'
-						+ 'Returning to the main menu...\n');
-					return managerMenu.main();
-				// error handler for promise chain
-				}).catch(function(errMsg){
-					console.log("\nWe're sorry, but we were unable to process your request.\n"
-						+ 'Reason: ' + errMsg + '\n');
-					return managerMenu.main();
-				}); // end of promise chain
-			}); // end of first prompt() promise (input product info)
+				}]);
+				return Promise.all([answersOne, promptTwo]);
+			// promsise for Promise.all() above, returns array with answersOne and answers from 
+			// promptTwo
+			}).then(function(answersAry){
+				// if no, throws an error so that it jumps directly to the catch
+				// handler of the promise chain
+				if (answersAry[1].confirm === false) {
+					throw 'Order canceled';
+				}
+				// sends answersAry[0] to bamazonDB.products.addNew()
+				// this function, a promise, is returned to continue promise chain
+				return bamazonDB.products.addNew(
+					answersAry[0].product_name,
+					answersAry[0].department_name,
+					answersAry[0].price,
+					answersAry[0].stock_quantity
+				);
+			// promise for bamazonDB.products.addNew()
+			}).then(function(results){
+				console.log(results);
+				console.log('\n\nProduct successfully added!\n'
+					+ 'Returning to the main menu...\n');
+				return managerMenu.main();
+			// error handler for promise chain
+			}).catch(function(errMsg){
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+					+ 'Reason: ' + errMsg + '\n');
+				return managerMenu.main();
+			}); // end of promise chain
 		} // end of productMng.addNewProduct()
 	}, // end of managerMenu.productMng subset object
 	// function for quitting the manager menu
