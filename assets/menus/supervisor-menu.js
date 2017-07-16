@@ -142,34 +142,47 @@ const supervisorMenu = {
 				console.log('\nReview new department information:\n'
 					+ '\nDepartment Name: ' + answersOne.department_name
 					+ '\nOverhead Costs: $' + answersOne.over_head_costs + '\n');
-				// prompt to confirm details
-				prompt([{
+				
+				// prompt to confirm details. this prompt is named promptTwo and sent as an argument
+				// to Promise.all() above along with answersOne from first prompt. This allows
+				// promise .then() functions to be chained and handle all errors in one final 
+				// .catch() at the end.
+				let promptTwo = prompt([{
 					type: 'confirm',
 					message: 'Is the above information correct?',
 					name: 'confirm',
 					default: false
-				}]).then(function(answersTwo){
-					// if no, return to main main
-					if (answersTwo.confirm === false) {
-						console.log('\n\nReturning to the main menu...\n');
-						return supervisorMenu.main();
-					}
-					// sends answersOne to bamazonDB.departments.addNew()
-					bamazonDB.departments.addNew(
-						answersOne.department_name,
-						answersOne.over_head_costs
-					).then(function(results){
-						console.log('\n\Department successfully created!\n'
-							+ 'Returning to the main menu...\n');
-						return supervisorMenu.main();
-					// error handler for addNew() promise
-					}).catch(function(errMsg){
-						console.log("\nWe're sorry, but we were unable to process your request.\n"
-							+ 'Reason: ' + errMsg + '\n');
-						return supervisorMenu.main();							
-					});	// end of bamazonDB.departments.addNew() promise 
-				}); // end of second prompt() promise
-			}); // end of first prompt() promise
+				// promise for confirm prompt
+				}]);
+				return Promise.all([answersOne, promptTwo]);
+			// promsise for Promise.all() above, returns array with answersOne and answers from 
+			// promptTwo
+			}).then(function(answersAry){
+				// if no, throws an error so that it jumps directly to the catch
+				// handler of the promise chain
+				if (answersAry[1].confirm === false) {
+					throw 'Add new department request canceled';
+				}
+				// sends answers from the first prompt to bamazonDB.departments.addNew()
+				// and returns the function call, itself a promise, to continue the promise chain.
+				return bamazonDB.departments.addNew(
+					answersAry[0].department_name,
+					answersAry[0].over_head_costs
+				);
+			}).then(function(results){
+				console.log('\n\nDepartment successfully created!\n'
+					+ 'Returning to the main menu...\n');
+				return supervisorMenu.main();
+			// error handler for addNew() promise
+			}).catch(function(errMsg){
+				if (errMsg === 'Add new department request canceled') {
+					console.log('\nReturning to the main menu...\n');
+					return supervisorMenu.main();
+				}
+				console.log("\nWe're sorry, but we were unable to process your request.\n"
+					+ 'Reason: ' + errMsg + '\n');
+				return supervisorMenu.main();							
+			});	// end of promise chain
 		} // end of departmentMng.createNewDept()
 	}, // end of departmentMng subset object
 	quit: function() {
