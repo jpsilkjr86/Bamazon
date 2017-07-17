@@ -69,14 +69,25 @@ const supervisorMenu = {
 			         , 'left': '║' , 'left-mid': '╟' , 'mid': '─' , 'mid-mid': '┼'
 			         , 'right': '║' , 'right-mid': '╢' , 'middle': '│' }
 				});
-				// loops through results and pushes onto cli-table
+				// loops through results and pushes data onto cli-table
 				for (let i = 0; i < results.length; i++) {
-					table.push([
-						results[i].department_name,
-						'$' + results[i].over_head_costs,
-						'$' + results[i].total_product_sales,
-						results[i].total_profit
-					]);
+					// instantiates locally scoped variables equal to column values
+					let name = results[i].department_name;
+					let costs = results[i].over_head_costs;
+					let sales = results[i].total_product_sales;
+					let profit = results[i].total_profit;
+					// checks if total_product_sales is null. If so, sets equal to 
+					// '(No products added)'; else, puts dollar sign in front.
+					// null values come from when a department is created but no new 
+					// products have been added to it yet.
+					if (sales == null) {
+						sales = '(No products added)';
+					}
+					else {
+						sales = '$' + sales;
+					}
+					// pushes values onto table of cli-table module
+					table.push([name, '$' + costs, sales, profit]);
 				}
 				// displays talbe and returns to main menu
 				console.log(table.toString());

@@ -152,9 +152,11 @@ let bamazonDB = {
 					// view. The query below calculates total_profit by subtracting
 					// over_head_costs from total_product_sales column, the latter values of which
 					// are only accessible in the department_revenue view.
+					// IFNULL says that if total_product_sales is null, then treat it like 0.
+					// it will come up null if a department exists without any products added to it.
 					let salesTableQuery = 'SELECT d.department_name, d.over_head_costs,'
 						+ ' t.total_product_sales,'
-						+ ' (t.total_product_sales - d.over_head_costs) AS total_profit'
+						+ ' (IFNULL(t.total_product_sales,0) - d.over_head_costs) AS total_profit'
 						+ ' FROM departments AS d'
 						+ ' LEFT JOIN department_revenue AS t'
 						+ ' ON d.department_name=t.department_name'
