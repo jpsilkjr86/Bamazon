@@ -83,7 +83,7 @@ const customerMenu = {
 			// sends SQL query string and values array to bamazonDB.query()
 			// Displays all available products (item_id, product_name, price)
 			bamazonDB.query(
-				'SELECT ?? FROM products',
+				'SELECT ?? FROM products WHERE stock_quantity > 0',
 				[['item_id', 'product_name', 'price']]
 			// promise for bamazon.query()
 			).then(function(products){
@@ -206,7 +206,7 @@ const customerMenu = {
 			}).then(function(answers){
 				// declares locally scoped query string
 				let productsQuery = 'SELECT item_id, product_name FROM products'
-					+ ' WHERE department_name = ?';
+					+ ' WHERE department_name = ? AND stock_quantity > 0';
 				// returns bamazonDB.query, itself a promise.
 				return bamazonDB.query(productsQuery, [answers.department_name]);
 			// promise for bamazonDB query about products
