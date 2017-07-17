@@ -19,7 +19,8 @@ let bamazonDB = {
 			// attempts connection to mysql server.
 			connection.connect(function(err) {
 				if (err) {
-					return reject('Error connecting to Bamazon: ' + err.stack);
+					return reject('\nUnable to connect to Bamazon server:\n'
+					+ 'Failed to establish connection to MySQL database.');
 				}
 				// returns resolve if connection is successful
 				return resolve('connected as id ' + connection.threadId);
