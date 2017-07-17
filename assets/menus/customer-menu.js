@@ -222,6 +222,8 @@ const customerMenu = {
 				for (let i = 0; i < results.length; i++) {
 					departments.push(results[i].department_name);
 				}
+				// push option for 'Return to Main Menu' at end of array
+				departments.push('Return to Main Menu');
 				// creates prompt of type list dynamically from departments array
 				// and returns the prompt as a promise.
 				return prompt([{
@@ -232,6 +234,11 @@ const customerMenu = {
 				}]);
 			// promise for prompt
 			}).then(function(answers){
+				// throws an error if user chose to return to the main menu so that program
+				// jumps immediately to catch function at bottom of the promise chain
+				if (answers.department_name === 'Return to Main Menu') {
+					throw 'Return to Main Menu';
+				}
 				// declares locally scoped query string
 				let productsQuery = 'SELECT item_id, product_name FROM products'
 					+ ' WHERE department_name = ? AND stock_quantity > 0';
