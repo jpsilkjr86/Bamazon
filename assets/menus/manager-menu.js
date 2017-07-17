@@ -300,20 +300,17 @@ const managerMenu = {
 					+ '\nPrice: $' + answersOne.price
 					+ '\nStarting Stock Quantity: ' + answersOne.stock_quantity + '\n');
 				
-				// prompt to confirm details. this prompt is named promptTwo and sent as an argument
-				// to Promise.all() above along with answersOne from first prompt. This allows
-				// promise .then() functions to be chained and handle all errors in one final 
-				// .catch() at the end.
-				let promptTwo = prompt([{
+				// prompt question to confirm details.
+				let promptTwoQuestions = [{
 					type: 'confirm',
 					message: 'Is the above information correct?',
 					name: 'confirm',
 					default: false
-				// promise for confirm prompt
-				}]);
-				return Promise.all([answersOne, promptTwo]);
+				}];
+				// returns Promise.all() to continue promise chain
+				return Promise.all([answersOne, prompt(promptTwoQuestions)]);
 			// promsise for Promise.all() above, returns array with answersOne and answers from 
-			// promptTwo
+			// the second prompt
 			}).then(function(answersAry){
 				// if no, throws an error so that it jumps directly to the catch
 				// handler of the promise chain

@@ -240,7 +240,7 @@ const customerMenu = {
 				let indexOfColon = answers.product.search(':');
 				let requested_id = parseInt(answers.product.substr(4, indexOfColon));
 
-				let qtyPrompt = prompt([{
+				let qtyPromptQuestions = [{
 					type: 'input',
 					message: 'How many items would you like? ',
 					name: 'requested_quantity',
@@ -258,11 +258,11 @@ const customerMenu = {
 					filter: function(str) {
 						return parseInt(str.trim());
 					}
-				}]);
-				return Promise.all([requested_id, qtyPrompt]);
+				}];
+				return Promise.all([requested_id, prompt(qtyPromptQuestions)]);
 			}).then(function(productRequests){
 				// parameters correspond to Promise.all parameters. the first is just a value
-				// passed along, the second is the answers object from the qtyPrompt.
+				// passed along, the second is the answers object from the quantity prompt.
 				let requested_id = productRequests[0];
 				let requested_quantity = productRequests[1].requested_quantity;
 
