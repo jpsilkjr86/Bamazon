@@ -125,7 +125,8 @@ const supervisorMenu = {
 					if (str === '') {
 						return null;
 					}
-					return parseInt(str.trim());
+					// truncates at the hundredth decimal place
+					return Math.floor(parseFloat(str.trim())*100) / 100;
 				},
 				validate: function(value) {
 					if (value === null) {
