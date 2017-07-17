@@ -157,13 +157,41 @@ const customerMenu = {
 				// starts a newOrder object using the answers from the previous prompt
 				const newOrder = 
 					new BamazonOrder(answers.requested_id, answers.requested_quantity);
-				// return newOrder.checkout() as a promise.
-				return newOrder.checkout();
-			// promise for newOrder.checkout()
+				// returns newOrder.reviewOrder(), itself a promise
+				return newOrder.reviewOrder();
+			// promise for newOrder.reviewOrder()
+			}).then(function(thisOrder){
+				console.log('\n ======= REVIEW YOUR ORDER =======\n'
+					+ '\nProduct: ' + thisOrder.product_name
+					+ '\nPrice: $' + thisOrder.price
+					+ '\nQuantity: ' + thisOrder.requested_quantity
+					+ '\nTotal: $' + thisOrder.total_cost + '\n');
+				// for use in prompt below
+				let confirmPromptQuestion = [{
+					type: 'confirm',
+					message: 'Is the above information correct?',
+					name: 'confirm',
+					default: false
+				}];
+				// returns Promise.all to continue the promise chain.
+				return Promise.all([thisOrder, prompt(confirmPromptQuestion)]);
+			// promise for confirm prompt
+			}).then(function(promiseArgs){
+				// declares locally scoped variables equal to elements of promiseArgs
+				let thisOrder = promiseArgs[0];
+				let answers = promiseArgs[1];
+				// if answer to confirm prompt is no, throws an error so that it jumps 
+				// directly to the catch handler of the promise chain.
+				if (answers.confirm === false) {
+					throw 'Order canceled';
+				}
+				// return thisOrder.checkout() as a promise.
+				return thisOrder.checkout();
+			// promise for thisOrder.checkout()
 			}).then(function(orderDetails){
 				// if all the promises in the chain are resolved, then do this
-				console.log('\nYour purchase was successful!\n'
-					+ '\n ******* ORDER DETAILS: ******* \n'
+				console.log('\n ******* ORDER DETAILS: ******* \n'
+					+ '\nYour purchase was successful!\n'
 					+ '\nItem ID: ' + orderDetails.item_id
 					+ '\nProduct: ' + orderDetails.product_name
 					+ '\nDepartment: ' + orderDetails.department_name
@@ -274,13 +302,41 @@ const customerMenu = {
 				// starts a newOrder object using the obtained user inputs
 				const newOrder = 
 					new BamazonOrder(requested_id, requested_quantity);
-				// returns newOrder.checkout() as a promise.
-				return newOrder.checkout();
-			// promise for newOrder.checkout()
+				// returns newOrder.reviewOrder(), itself a promise
+				return newOrder.reviewOrder();
+			// promise for newOrder.reviewOrder()
+			}).then(function(thisOrder){
+				console.log('\n ======= REVIEW YOUR ORDER =======\n'
+					+ '\nProduct: ' + thisOrder.product_name
+					+ '\nPrice: $' + thisOrder.price
+					+ '\nQuantity: ' + thisOrder.requested_quantity
+					+ '\nTotal: $' + thisOrder.total_cost + '\n');
+				// for use in prompt below
+				let confirmPromptQuestion = [{
+					type: 'confirm',
+					message: 'Is the above information correct?',
+					name: 'confirm',
+					default: false
+				}];
+				// returns Promise.all to continue the promise chain.
+				return Promise.all([thisOrder, prompt(confirmPromptQuestion)]);
+			// promise for confirm prompt
+			}).then(function(promiseArgs){
+				// declares locally scoped variables equal to elements of promiseArgs
+				let thisOrder = promiseArgs[0];
+				let answers = promiseArgs[1];
+				// if answer to confirm prompt is no, throws an error so that it jumps 
+				// directly to the catch handler of the promise chain.
+				if (answers.confirm === false) {
+					throw 'Order canceled';
+				}
+				// returns thisOrder.checkout() as a promise.
+				return thisOrder.checkout();
+			// promise for thisOrder.checkout()
 			}).then(function(orderDetails){
 				// if all the promises in the chain are resolved, then do this
-				console.log('\nYour purchase was successful!\n'
-					+ '\n ******* ORDER DETAILS: ******* \n'
+				console.log('\n ******* ORDER DETAILS: ******* \n'
+					+ '\nYour purchase was successful!\n'
 					+ '\nItem ID: ' + orderDetails.item_id
 					+ '\nProduct: ' + orderDetails.product_name
 					+ '\nDepartment: ' + orderDetails.department_name

@@ -15,6 +15,36 @@ let BamazonOrder = function (item_id=0, requested_quantity=0, product_name='', p
 	this.order_status = order_status;
 };
 
+BamazonOrder.prototype.reviewOrder = function () {
+	const thisOrder = this;
+
+	return new Promise(function(resolve, reject){
+		// review continues if it's able to retrieve product info from database & if it's in stock
+		bamazonDB.products.getById(thisOrder.item_id).then(function(product) {			
+			// if product is out of stock, do not proceed
+			if (product.stock_quantity == null || product.stock_quantity === 0) {
+				return reject('Out of stock.');
+			}
+			// if product.stock_quantity < thisOrder.requested_quantity, do not proceed
+			if (product.stock_quantity < thisOrder.requested_quantity) {
+				return reject('Insufficient stock.');
+			}
+			// update current order with retrieved product information. calculates
+			// total cost by multiplying price by requested quantity
+			thisOrder.product_name = product.product_name;
+			thisOrder.price = product.price;
+			thisOrder.department_name = product.department_name;
+			thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
+
+			// resolve parameter is updated hash of thisOrder (called 'orderDetails' on point of use)
+			return resolve(thisOrder);
+		}).catch(function(failureMessage){
+			// passes failureMessage parameter from one promise to the next
+			return reject(failureMessage);
+		}); // end of promise chain
+	});
+}; // end of reviewOrder()
+
 
 BamazonOrder.prototype.checkout = function () {
 	// saves 'this' object as more manageable variable
@@ -34,11 +64,6 @@ BamazonOrder.prototype.checkout = function () {
 			if (product.stock_quantity < thisOrder.requested_quantity) {
 				return reject('Insufficient stock.');
 			}
-			// update current order with retrieved product information
-			thisOrder.product_name = product.product_name;
-			thisOrder.price = product.price;
-			thisOrder.department_name = product.department_name;
-
 			// returns bamazonDB.products.transaction, itself a promise as well.
 			return bamazonDB.products.transaction(
 				thisOrder.item_id, thisOrder.requested_quantity
@@ -49,9 +74,6 @@ BamazonOrder.prototype.checkout = function () {
 			// these values are updated after mysql query. default values set in paramters above.
 			thisOrder.order_success = true;
 			thisOrder.order_status = 'Purchase successful!';
-
-			// calculated by multiplying price and requested_quantity
-			thisOrder.total_cost = thisOrder.price * thisOrder.requested_quantity;
 
 			// here can add a function for adding order information to an orders table in mysql.
 			// still in development.
